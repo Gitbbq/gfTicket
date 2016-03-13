@@ -1,0 +1,51 @@
+{% extends 'IPAddress/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>子网列表</h3>
+            <table id="network_table" class="table table-bordered table-striped">
+
+                <thead>
+                <tr>
+                    <th>简介</th>
+                    <th>子网地址</th>
+                    <th>子网掩码</th>
+                    <th>部门</th>
+                    <th>VLAN ID</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for network in all_network %}
+                    <tr>
+                        <td><a href="{% url "IPAddress:network" network.db_uuid %}">{{ network.summary }}</a></td>
+                        <td>{{ network.subnet_address }}</td>
+                        <td>{{ network.mask }}</td>
+                        <td>{{ network.department.title }}[{{ network.department.dot_code }}]</td>
+                        <td>{{ network.vlan }}</td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#network_table').DataTable({
+                "paging": false,
+                "info": false
+            });
+        });
+    </script>
+{% endblock %}

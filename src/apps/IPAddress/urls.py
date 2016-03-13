@@ -26,17 +26,18 @@ from django.conf.urls import url
 # Imports from your apps
 
 
-# from .views import BSView
+from .views import Index, NetworkView
+
 # from .views import BusinessSystemView
 
 app_name = 'IPAddress'
 urlpatterns = [
-#     url(regex=r'^bs$',
-#         view=BSView.as_view(),
-#         name="bs_view",
-#         ),
-#     url(regex=r'^system/(?P<db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
-#         view=BusinessSystemView.as_view(),
-#         name="system_view",
-#         ),
+    url(regex=r'^$',
+        view=Index.as_view(),
+        name="index",
+        ),
+    url(regex=r'^network/(?P<db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
+        view=NetworkView.as_view(),
+        name="network",
+        ),
 ]

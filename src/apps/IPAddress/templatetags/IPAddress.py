@@ -17,7 +17,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 # Stdlib imports
-
+import ipaddress
 # Core Django imports
 from django import template
 from django.utils.translation import ugettext_lazy as _
@@ -37,4 +37,15 @@ def ip_to_department(ip_address):
         return _("无法判断地址来源")
 
 
+def ip_sn(ip_address):
+    ip = ipaddress.ip_address(ip_address)
+    if ip.version == 4:
+        return ip.__str__().split(".")[-1]
+    elif ip.version == 6:
+        return ip.exploded.__str__().strip(":")[-1]
+    else:
+        return "0"
+
+
 register.filter('ip_to_department', ip_to_department)
+register.filter('ip_sn', ip_sn)

@@ -31,6 +31,7 @@ urlpatterns = [
                   url(r'^SupportTicketSystem/', include('apps.SupportTicketSystem.urls')),
                   url(r'^BusinessSystem/', include('apps.BusinessSystem.urls')),
                   url(r'^Equipment/', include('apps.Equipment.urls')),
+                  url(r'^IPAddress/', include('apps.IPAddress.urls')),
                   url(r'^$', Index.as_view(), name="index"),
                   url(r'^django-rq/', include('django_rq.urls')),
               ] \

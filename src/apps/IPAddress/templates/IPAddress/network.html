@@ -1,0 +1,72 @@
+{% extends 'IPAddress/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load IPAddress %}
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>子网：{{ network.summary }}</h3>
+            <table id="network_table" class="table table-bordered">
+
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>IP地址</th>
+                    <th>详细描述</th>
+                    <th>主机名</th>
+                    <th>最后连通</th>
+                    <th>最后扫描</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in all_host %}
+                    <tr>
+                        <td>{{ host.ip_address|ip_sn }}</td>
+                        <td>{{ host.ip_address }}</td>
+                        <td><a href="{% url 'admin:IPAddress_host_change' host.id %}">{{ host.description }}</a></td>
+                        <td>{% if host.hostname %}{{ host.hostname }}{% endif %}</td>
+                        {% if not host.ping_last_success_time %}
+                            <td class="danger">从未连通</td>
+                        {% elif host.ping_last_success_minute <= 60 %}
+                            <td class="success">{{ host.ping_last_success_minute|floatformat:"0" }}分钟</td>
+                        {% elif  host.ping_last_success_hours > 1 and host.ping_last_success_hours <= 24 %}
+                            <td class="success">{{ host.ping_last_success_hours|floatformat:"-1" }}小时</td>
+                        {% elif host.ping_last_success_days > 1 and host.ping_last_success_days <= 30 %}
+                            <td class="info">{{ host.ping_last_success_days|floatformat:"-1" }}天</td>
+                        {% else %}
+                            <td class="warning">超过30天</td>
+                        {% endif %}
+
+
+
+                        <td>{% if host.latest_scan_time_minute <= 60 %}
+                            {{ host.latest_scan_time_minute|floatformat:"0" }}分钟
+                        {% elif host.latest_scan_time_minute > 60 %}
+                            {{ host.latest_scan_time_hours|floatformat:"-1" }}小时
+                        {% endif %}
+                        </td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#network_table').DataTable({
+                "paging": false,
+                "info": false
+            });
+        });
+    </script>
+{% endblock %}

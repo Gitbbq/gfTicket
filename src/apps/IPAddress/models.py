@@ -124,11 +124,20 @@ class Host(CommonModel):
     ping_last_success_fraction_loss = models.FloatField(verbose_name=_("丢包率"), null=True, blank=True)
     ping_last_success_time = models.DateTimeField(verbose_name=_("最后ping通"), null=True, blank=True)
 
+    def latest_scan_time_hours(self):
+        return ((timezone.datetime.now() - self.latest_scan_time).total_seconds()) / 3600
+
+    def latest_scan_time_minute(self):
+        return ((timezone.datetime.now() - self.latest_scan_time).total_seconds()) / 60
+
+    def ping_last_success_minute(self):
+        return ((timezone.datetime.now() - self.ping_last_success_time).total_seconds()) / 60
+
     def ping_last_success_hours(self):
-        return "%d" % (((timezone.datetime.now() - self.ping_last_success_time).seconds)/3600)
+        return ((timezone.datetime.now() - self.ping_last_success_time).total_seconds()) / 3600
 
     def ping_last_success_days(self):
-        return (timezone.datetime.now() - self.ping_last_success_time).days
+        return ((timezone.datetime.now() - self.ping_last_success_time).total_seconds()) / 86400
 
     def _scan(self, ping_timeout=1000, ping_packet=3, smb_timeout=3):
         maxTime, minTime, avrgTime, fracLoss = quiet_ping(hostname=self.ip_address, timeout=ping_timeout, count=ping_packet, path_finder=True)
