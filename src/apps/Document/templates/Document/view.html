@@ -1,0 +1,83 @@
+{% extends 'Document/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3 class="bg-default">{{ entry.title }} </h3>
+            <p class="text-left">
+                {% for tag in entry.tag.all %}
+                    <a href="{% url 'Document:tag_view' tag.db_uuid %}" class="btn btn-default btn-xs">{{ tag.title }}</a>
+                {% endfor %}
+            </p>
+
+        </div>
+
+
+        <div class="col-md-12 blog-main">
+
+            <br/>
+            <div class="markdown-body">
+                <hr/>
+                {{ entry.content|markdown|safe }}
+
+            </div>
+
+
+        </div>
+
+        <div class="col-md-12">
+
+            <hr/>
+            <p class="text-center">标签</p>
+
+            <p class="text-center">
+                {% for tag in entry.tag.all %}
+                    <a href="{% url 'Document:tag_view' tag.db_uuid %}" class="btn btn-default btn-xs">{{ tag.title }}</a>
+                {% endfor %}
+            </p>
+
+            {% if entry.relevant_business.all %}
+
+                <hr/>
+                <p class="text-center">涉及系统</p>
+
+                <p class="text-center">
+                    {% for business in entry.relevant_business.all %}
+                        <a href="{% url "BusinessSystem:system_view" business.db_uuid %}" class="btn btn-default btn-xs">{{ business.title }}</a>
+                    {% endfor %}
+                </p>
+
+
+            {% endif %}
+
+            {% if entry.relevant_equipment.all %}
+
+                <hr/>
+                <p class="text-center">涉及硬件</p>
+
+                <p class="text-center">
+                    {% for equipment in entry.relevant_equipment.all %}
+                        <a href="{% url "Equipment:equipment_model_view" equipment.db_uuid %}" class="btn btn-default btn-xs">{{ equipment.title }}</a>
+                    {% endfor %}
+                </p>
+
+            {% endif %}
+
+            <hr/>
+            <p class="text-center">关键词</p>
+            <p class="text-center">
+                {% for word in entry.key_word %}
+                    <a class="btn btn-default btn-xs">{{ word }}</a>
+                {% endfor %}
+            </p>
+        </div>
+
+    </div>
+
+{% endblock %}

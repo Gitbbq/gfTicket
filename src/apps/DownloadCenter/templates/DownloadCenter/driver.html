@@ -1,0 +1,63 @@
+{% extends 'DownloadCenter/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+
+
+
+
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>驱动列表</h3>
+
+            <table id="driver_table" class="table table-bordered ">
+
+                <thead>
+                <tr>
+                    <th>设备类型</th>
+                    <th>设备品牌</th>
+                    <th>适用型号</th>
+                    <th>兼容性</th>
+                    <th>下载</th>
+                    <th>说明</th>
+                    <th>复制</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for driver in drivers %}
+                    <tr>
+                        <td>{{ driver.type }}</td>
+                        <td>{{ driver.brand }}</td>
+                        <td>{{ driver.get_equipment_model_list }}</td>
+                        <td>{{ driver.get_os_compatibility_display }}</td>
+                        <td><a href="{{ driver.orig_file.url }}">{{ driver.filename }}</a></td>
+                        <td>{{ driver.manual|markdown|safe }}</td>
+
+                        <td><input type="text" size="5"
+                                   value="[{{ driver.brand }}-{{ driver.get_equipment_model_list }}-{{ driver.get_os_compatibility_display }}]({{ driver.orig_file.url }})"
+                                   onClick="this.select();"></td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#driver_table').DataTable({
+                "paging": false,
+                "info": false
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2>提交新工单
+                <small>补充信息</small>
+            </h2>
+        </div>
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+
+                {% for hidden in form.hidden_fields %}
+                    {% bootstrap_field hidden %}
+                    {% if hidden.errors %}
+                        {% for error in hidden.errors %}
+                            {% bootstrap_alert error 'warning' %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                {% for field in form.visible_fields %}
+                    {% bootstrap_field field size="small" %}
+                {% endfor %}
+
+                {% bootstrap_form_errors form %}
+
+
+                {% buttons submit='提交' %}{% endbuttons %}
+            </form>
+        </div>
+        <div class="col-md-12">
+
+            <hr/>
+            <p>参数维护</p>
+            <a class="btn btn-default" href="{% url 'admin:BranchManager_department_changelist' %}" role="button">部门</a>
+            <a class="btn btn-default" href="{% url 'admin:SupportTicketSystem_trouble_changelist' %}" role="button">故障现象</a>
+            <a class="btn btn-default" href="{% url 'admin:SupportTicketSystem_tag_changelist' %}" role="button">标签</a>
+            <a class="btn btn-default" href="{% url 'admin:BusinessSystem_system_changelist' %}" role="button">涉及系统</a>
+            <a class="btn btn-default" href="{% url 'admin:Equipment_equipmentmodel_changelist' %}" role="button">硬件设备</a>
+        </div>
+    </div>
+    {#    {{ form }}#}
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#id_relevant_business").select2({language: "zh-CN"});
+            $("#id_relevant_equipment").select2({language: "zh-CN"});
+            $('#id_scheduled_time').datepicker({
+                format: "yyyy-mm-dd",
+                weekStart: 7,
+                todayBtn: true,
+                language: "zh-CN",
+                daysOfWeekHighlighted: "1,2,3,4,5",
+                todayHighlight: true
+            });
+
+
+        });
+
+    </script>
+
+
+
+
+{% endblock %}

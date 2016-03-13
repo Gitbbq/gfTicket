@@ -1,0 +1,33 @@
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">下载中心<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li><a href="{% url "DownloadCenter:attachment" %}">附件</a></li>
+        <li><a href="{% url "DownloadCenter:driver" %}">驱动</a></li>
+        <li><a href="{% url "DownloadCenter:business_software" %}">业务软件</a></li>
+        {#        {% if request.user.attendance_system_user.is_worker %}#}
+        {#            <li role="separator" class="divider"></li>#}
+        {#            <li><a href="{% url "AttendanceSystem:my" %}">我的签到记录</a></li>#}
+        {#            <li><a href="{% url "AttendanceSystem:check_in" %}">签到</a></li>#}
+        {#            <li><a href="{% url "AttendanceSystem:check_out" %}">签退</a></li>#}
+        {##}
+        {#        {% endif %}#}
+        {#        {% if request.user.attendance_system_user.is_admin %}#}
+        {#            <li role="separator" class="divider"></li>#}
+        {#            <li><a href="{% url "AttendanceSystem:admin_view" %}">Admin View</a></li>#}
+        {##}
+        {#        {% endif %}#}
+        {#        {% if request.session.verified and not request.user.attendance_system_user %}#}
+        {#            <li role="separator" class="divider"></li>#}
+        {#            <li><a href="{% url "AttendanceSystem:initialize_user" %}">初始化用户</a></li>#}
+        {##}
+        {#        {% endif %}#}
+        {#                                <li><a href="#">Another action</a></li>#}
+        {#                                <li><a href="#">Something else here</a></li>#}
+        {#                                <li role="separator" class="divider"></li>#}
+        {#                                <li class="dropdown-header">区域</li>#}
+        {#                                <li><a href="">添加区域</a></li>#}
+        {#                                <li role="separator" class="divider"></li>#}
+        {#                                <li><a href="#">One more separated link</a></li>#}
+    </ul>
+</li>

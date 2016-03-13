@@ -1,0 +1,92 @@
+{% extends 'AttendanceSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load local_time_format %}
+{% load SSO %}
+{% load IPAddress %}
+
+
+
+
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+
+            <h2>Admin View</h2>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-hover table-condensed">
+                <caption>今日签到</caption>
+                <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>状态</th>
+                    <th>签到</th>
+                    <th>签退</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for worker in workers %}
+                    <tr>
+                        <th>{{ worker.user|short_name }}</th>
+                        <th>{% if worker.on_duty %}在岗{% else %}不在岗{% endif %}</th>
+                        <th>{{ worker.today_first_time }}</th>
+                        <th>{{ worker.today_last_time }}</th>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+        <div class="col-md-12">
+            <table id="month_table" class="table table-bordered table-hover table-condensed">
+                <caption>两月数据(点击表头排序)</caption>
+                <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>星期</th>
+                    <th>用户</th>
+                    <th>签到时间</th>
+                    <th>签到地址</th>
+                    <th>签退时间</th>
+                    <th>签退地点</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <th>{{ entry.date|format_date:"medium" }}</th>
+                        <th>{{ entry.weekday }}</th>
+                        <th>{{ entry.user.user|short_name }}</th>
+                        <th>{{ entry.first_time|format_time }}</th>
+                        <th><abbr title="{{ entry.first_time_ip }}">{{ entry.first_time_ip|ip_to_department }}</abbr></th>
+                        <th>{{ entry.last_time|format_time }}</th>
+                        <th><abbr title="{{ entry.last_time_ip }}">{{ entry.last_time_ip|ip_to_department }}</abbr></th>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#month_table').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false
+            });
+            $("[data-toggle='tooltip']").tooltip();
+        });
+    </script>
+{% endblock %}

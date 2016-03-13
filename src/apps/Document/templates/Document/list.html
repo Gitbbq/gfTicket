@@ -1,0 +1,73 @@
+{% extends 'Document/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+
+{% block page_content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                {% if  request.session.verified %}
+                    权限：
+                    {% if request.user.document_user.permission == 0 %}访客
+                    {% elif request.user.document_user.permission == 1 %}一般权限
+                    {% elif request.user.document_user.permission == 2 %}高级权限{% endif %}
+                {% else %}
+                    未认证，访客权限，运维用户点击<strong><a href="{% url "SSO:verified" %}">这里</a></strong>认证。
+                {% endif %}
+
+            </p>
+            <hr/>
+
+
+            {% for entry in entries %}
+
+                <div class="panel panel-{{ entry.css_style }}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><a href="{% url 'Document:view' entry.db_uuid %}">
+                            {{ entry.title }}
+                        </a>
+                            <small>--{{ entry.db_modified|format_datetime:"y/M/d" }}</small>
+                        </h3>
+                    </div>
+                    {% if entry.content_less %}
+                        <div class="panel-body">
+                            {{ entry.content_less|markdown|safe }}
+                        </div>
+                    {% endif %}
+                </div>
+
+
+            {% endfor %}
+
+
+            {#        <table class="table table-bordered table-hover table-condensed">#}
+            {#            <thead>#}
+            {#            <tr>#}
+            {#                <th>日期</th>#}
+            {#                <th>星期</th>#}
+            {#                <th>首次签到时间</th>#}
+            {#                <th>最后签退时间</th>#}
+            {#            </tr>#}
+            {#            </thead>#}
+            {#            <tbody>#}
+            {#            {% for entry in my_entries %}#}
+            {#                <tr>#}
+            {#                    <th>{{ entry.date|format_date:"medium"}}</th>#}
+            {#                    <th>{{ entry.weekday }}</th>#}
+            {#                    <th>{{ entry.first_time|format_time }}</th>#}
+            {#                    <th>{{ entry.last_time|format_time }}</th>#}
+            {#                </tr>#}
+            {#            {% endfor %}#}
+            {##}
+            {#            </tbody>#}
+            {##}
+            {#        </table>#}
+
+        </div>
+    </div>
+
+{% endblock %}

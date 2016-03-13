@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+
+{% block navbar_tree %}
+
+{% endblock %}
+
+{% block bootstrap3_theme %}
+    <link rel="stylesheet" href="{% static "bootstrap-theme/yeti/bootstrap.min.css" %}">
+{% endblock %}
+
+{% block page_content %}
+    <h2>认证</h2>
+    <form action="" method="post" class="form">
+        {% csrf_token %}
+        {#                    {% bootstrap_form form layout='horizontal' %}#}
+
+        {% for hidden in form.hidden_fields %}
+            {% bootstrap_field hidden %}
+            {% if hidden.errors %}
+                {% for error in hidden.errors %}
+                    {% bootstrap_alert error 'warning' %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+        {#             Include the visible fields#}
+        {% for field in form.visible_fields %}
+            {% bootstrap_field field %}
+        {% endfor %}
+
+        {% bootstrap_form_errors form %}
+
+
+        {% buttons submit='提升' %}{% endbuttons %}
+    </form>
+
+
+    {#    {{ form }}#}
+
+
+
+{% endblock %}

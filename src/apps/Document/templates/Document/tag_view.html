@@ -1,0 +1,51 @@
+{% extends 'Document/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                {% if  request.session.verified %}
+                    权限：
+                    {% if request.user.document_user.permission == 0 %}访客
+                    {% elif request.user.document_user.permission == 1 %}一般权限
+                    {% elif request.user.document_user.permission == 2 %}高级权限{% endif %}
+                {% else %}
+                    未认证，访客权限，运维用户点击<strong><a href="{% url "SSO:verified" %}">这里</a></strong>认证。
+                {% endif %}
+
+            </p>
+            <hr/>
+
+            {#    {{ tag }}#}
+            {#    {{ entries }}#}
+            {% for entry in entries %}
+
+                <div class="panel panel-{{ entry.css_style }}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><a href="{% url 'Document:view' entry.db_uuid %}">
+                            {{ entry.title }}
+                        </a>
+                            <small>--{{ entry.db_modified|format_datetime:"y/M/d" }}</small>
+                        </h3>
+                    </div>
+                    {% if entry.content_less %}
+                        <div class="panel-body">
+                            {{ entry.content_less|markdown|safe }}
+                        </div>
+                    {% endif %}
+                </div>
+
+
+            {% endfor %}
+
+
+        </div>
+    </div>
+
+
+{% endblock %}

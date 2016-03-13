@@ -1,0 +1,14 @@
+{% extends 'AttendanceSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load local_time_format %}
+
+
+
+
+{% block page_content %}
+    {#        <h2>今日签到</h2>#}
+    <h2>{{ request.GET.error }}</h2>
+
+
+{% endblock %}

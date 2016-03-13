@@ -1,0 +1,226 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+{% load django_markdown %}
+
+
+{% block page_content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>工单信息</h2>
+        </div>
+
+        <hr/>
+        <div class="col-md-12">
+            <hr/>
+            <p class="text-left"><strong>报障信息</strong></p>
+
+            <p class="text-left {% if ticket.after_sale_protection %}info
+                    {% elif ticket.completed %}success
+                    {% elif 1.0 < ticket.urgency and ticket.urgency <= 3.0 %}warning
+                    {% elif 3.0 < ticket.urgency %}danger
+                    {% endif %}">
+                计划时间：<abbr title="已过去{{ ticket.working_days|floatformat:"0" }}个工作日">{{ ticket.scheduled_time|date:"m/d G:i" }}</abbr><br/>
+                网点：{{ ticket.department.title }}<br/>
+                故障现象：{% for trouble in ticket.troubles.all %}{{ trouble.title }}{% if not forloop.last %}、{% endif %}{% endfor %}<br/>
+                联系人：{{ ticket.contact_name }}<br/>
+                联系方式：{{ ticket.contact_telephone }}<br/>
+                影响范围：{{ ticket.get_incidence_display }}<br/>
+            </p>
+
+            {% if ticket.detail %}
+                <hr/>
+                <p class="text-left"><strong>其他信息</strong></p>
+                <p class="text-left">
+                    {{ ticket.detail|markdown|safe }}
+                </p>
+            {% endif %}
+            <hr/>
+            <p class="text-left"><strong>登记信息</strong></p>
+
+            <p class="text-left">
+                登记时间：{{ ticket.start_time|date:"m/d G:i" }}<br/>
+                登记人：{{ ticket.creator.user|short_name }}<br/>
+                标签： {% for tag in ticket.tag.all %}{{ tag.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+                优先级：{{ ticket.level }}<br/>
+                指定处理人：{% if ticket.responsible_person %}{{ ticket.responsible_person.user|short_name }}{% else %}未指定{% endif %}<br/>
+                网点分区责任人：{% for p in ticket.who_can_handle %}{{ p.user|short_name }}{% if not forloop.last %},{% endif %}{% endfor %}<br/>
+            </p>
+
+            {% if ticket.completed %}
+                <hr/>
+                <p class="text-left"><strong>完成状态</strong></p>
+                <p class="text-left">完成时间：{{ ticket.completed_time|date:"m/d G:i" }}<br/>
+
+                    完成人：{{ ticket.completed_person.user|short_name }}
+
+                </p>
+            {% endif %}
+        </div>
+
+
+        <div class="col-md-12">
+
+
+            {% if ticket.relevant_business.all %}
+
+                <hr/>
+                <p class="text-left"><strong>涉及系统：</strong>
+                    {% for business in ticket.relevant_business.all %}
+                        <a href="{% url "BusinessSystem:system_view" business.db_uuid %}" class="btn btn-default btn-xs">{{ business.title }}</a>
+                    {% endfor %}
+                </p>
+
+
+            {% endif %}
+
+            {% if ticket.relevant_equipment.all %}
+
+                <hr/>
+                <p class="text-left"><strong>涉及硬件：</strong>
+                    {% for equipment in ticket.relevant_equipment.all %}
+                        <a href="{% url "Equipment:equipment_model_view" equipment.db_uuid %}" class="btn btn-default btn-xs">{{ equipment.title }}</a>
+                    {% endfor %}
+                </p>
+
+            {% endif %}
+
+
+            {% if ticket.need_completed_by_admin %}
+                <hr/>
+                <p class="text-left text-warning"><strong>特殊状态：这个任务需由管理员完成</strong></p>
+                {% if ticket.push_to_admin %}
+                    <p class="text-left text-info"><strong>已提交给管理员</strong></p>
+                {% endif %}
+            {% endif %}
+
+            {% if ticket.after_sale_protection %}
+                <hr/>
+                <p class="text-left text-warning"><strong>特殊状态：已报维保</strong></p>
+            {% endif %}
+
+        </div>
+
+
+        <hr/>
+        <div class="col-md-12">
+            <hr/>
+            <h3>操作</h3>
+            <a class="btn btn-default" href="{% url "SupportTicketSystem:ticket_pick" ticket.db_uuid %}" role="button">认领任务</a>
+
+
+            {% if not ticket.need_completed_by_admin or  request.user.support_ticket_system_user.is_admin %}
+                {% if not ticket.completed %}
+                    <a class="btn btn-success" href="{% url "SupportTicketSystem:complete_ticket" ticket.db_uuid %}" role="button">完成任务</a>
+                {% elif ticket.completed %}
+                    <a class="btn btn-danger" href="{% url "SupportTicketSystem:complete_ticket" ticket.db_uuid %}" role="button">取消完成状态</a>
+                {% endif %}
+            {% else %}
+                {% if not ticket.push_to_admin %}
+                    <a class="btn btn-success" href="{% url "SupportTicketSystem:push_admin" ticket.db_uuid %}" role="button">提交给管理员</a>
+                {% elif  ticket.push_to_admin %}
+                    <a class="btn btn-danger" href="{% url "SupportTicketSystem:push_admin" ticket.db_uuid %}" role="button">退回提交管理员</a>
+                {% endif %}
+            {% endif %}
+
+
+            {% if not ticket.after_sale_protection %}
+                <a class="btn btn-info" href="{% url "SupportTicketSystem:after_sale_protection" ticket.db_uuid %}" role="button">设置为维保</a>
+            {% elif ticket.after_sale_protection %}
+                <a class="btn btn-danger" href="{% url "SupportTicketSystem:after_sale_protection" ticket.db_uuid %}" role="button">取消维保状态</a>
+            {% endif %}
+
+
+
+            {% if request.user.support_ticket_system_user.is_admin or request.user.support_ticket_system_user.is_watcher %}
+                <div class="btn-group" role="group">
+                    <a class="btn btn-warning" href="{% url "SupportTicketSystem:ticket_up" ticket.db_uuid %}"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a>
+                    <a class="btn btn-default" disabled="disabled">优先级</a>
+                    <a class="btn btn-info" href="{% url "SupportTicketSystem:ticket_down" ticket.db_uuid %}"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a>
+                </div>
+            {% endif %}
+
+            {% if request.user.support_ticket_system_user.is_admin or request.user.support_ticket_system_user.is_watcher %}
+                <hr/>
+                <h3>指派工单</h3>
+                <form action="" method="post" class="form">
+                    {% csrf_token %}
+
+                    {% for hidden in appoint_ticket_form.hidden_fields %}
+                        {% bootstrap_field hidden %}
+                        {% if hidden.errors %}
+                            {% for error in hidden.errors %}
+                                {% bootstrap_alert error 'warning' %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for field in appoint_ticket_form.visible_fields %}
+                        {% bootstrap_field field size="small" %}
+                    {% endfor %}
+
+                    {% bootstrap_form_errors appoint_ticket_form %}
+
+
+                    {% buttons submit='指派' %}{% endbuttons %}
+                </form>
+
+
+            {% endif %}
+
+
+        </div>
+
+        <div class="col-md-12">
+            <hr/>
+            <h3>附件</h3>
+            <form action="" method="post" class="form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% bootstrap_form file_form layout='inline' %}
+                {% buttons submit='上传附件' %}{% endbuttons %}
+            </form>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>文件名</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for file in ticket.files.all %}
+                    <tr>
+                        <td>{{ file.db_created|date:"Y/m/d" }}</td>
+                        <td><a href="{{ file.orig_file.url }}">{{ file.filename }}</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+        <div class="col-md-12">
+            <hr/>
+            <h3>工单日志</h3>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>用户</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for l in ticket.process.log %}
+                    <tr>
+                        <td>{{ l.time }}</td>
+                        <td>{{ l.user }}</td>
+                        <td>{{ l.action }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+{% endblock %}

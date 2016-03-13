@@ -1,0 +1,58 @@
+{% extends 'DownloadCenter/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+
+
+
+
+
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>业务软件</h3>
+            <table id="driver_table" class="table table-bordered ">
+
+                <thead>
+                <tr>
+                    <th>系统</th>
+                    <th>说明</th>
+                    <th>文件名</th>
+                    <th>复制</th>
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.system.title }}</td>
+                        <td>{{ entry.manual|markdown|safe }}</td>
+                        <td><a href="{{ entry.orig_file.url }}">{{ entry.filename }}</a></td>
+                        <td><input type="text" size="5" value="[{{ entry.filename }}]({{ entry.orig_file.url }})" onClick="this.select();"></td>
+
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#driver_table').DataTable({
+                "paging": false,
+                "info": false
+            });
+        });
+    </script>
+{% endblock %}

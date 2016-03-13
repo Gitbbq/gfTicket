@@ -1,0 +1,135 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+{% load django_markdown %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{ event.project.title }}</h2>
+        </div>
+
+        <hr/>
+        <div class="col-md-12">
+
+            <hr/>
+            <p class="text-left"><strong>主要信息</strong></p>
+
+            <p class="text-left {% if 1.0 < event.project.level and event.project.level <= 3.0 %}bg-warning{% elif 3.0 < event.project.level %}bg-danger{% endif %}">
+                创建者：{{ event.project.creator.user|short_name }}<br/>
+                计划时间：{{ event.project.scheduled_time|date:"Y/m/d G:i" }}<br/>
+                网点：{{ event.department.title }}<br/>
+                网点责任人：{% for p in event.who_can_handle %}{{ p.user|short_name }}{% if not forloop.last %},{% endif %}{% endfor %}<br/>
+
+            </p>
+
+            {% if event.project.detail %}
+                <hr/>
+                <p class="text-left"><strong>详情</strong></p>
+                <p class="text-left">
+                    {{ event.project.detail|markdown|safe }}
+                </p>
+            {% endif %}
+            {% if event.project.files.all %}
+                <hr/>
+                <p class="text-left"><strong>项目附件</strong></p>
+                <p>
+                    {% for file in event.project.files.all %}
+                        <a href="{{ file.orig_file.url }}">{{ file.filename }}</a><br/>
+                    {% endfor %}
+                </p>
+            {% endif %}
+
+            <hr/>
+            <p class="text-left"><strong>登记信息</strong></p>
+            <p class="text-left">
+                标签： {% for tag in event.project.tag.all %}{{ tag.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+                相关系统：
+                {% for relevant_business in event.project.relevant_business.all %}{{ relevant_business.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+                相关硬件：
+                {% for relevant_equipment in event.project.relevant_equipment.all %}{{ relevant_equipment.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+            </p>
+
+            {% if event.completed %}
+                <hr/>
+                <p class="text-left"><strong>完成状态</strong></p>
+                <p class="text-left">完成时间：{{ event.completed_time|date:"m/d G:i" }}<br/>
+
+                    完成人：{{ event.completed_person.user|short_name }}
+
+                </p>
+            {% endif %}
+
+        </div>
+        <hr/>
+
+
+        <div class="col-md-12">
+            <hr/>
+            <h3>附件</h3>
+            <form action="" method="post" class="form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% bootstrap_form file_form layout='inline' %}
+                {% buttons submit='上传附件' %}{% endbuttons %}
+            </form>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>文件名</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for file in event.files.all %}
+                    <tr>
+                        <td>{{ file.db_created|date:"Y/m/d" }}</td>
+                        <td><a href="{{ file.orig_file.url }}">{{ file.filename }}</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+
+        <div class="col-md-12">
+
+
+            <h3>操作</h3>
+            {% if not event.completed %}
+                <a class="btn btn-success" href="{% url "SupportTicketSystem:complete_project_event" event.db_uuid %}" role="button">完成任务</a>
+            {% elif event.completed %}
+                <a class="btn btn-danger" href="{% url "SupportTicketSystem:complete_project_event" event.db_uuid %}" role="button">取消完成状态</a>
+            {% endif %}
+
+        </div>
+        <hr/>
+        <div class="col-md-12">
+
+
+            <h3>日志</h3>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>用户</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for l in event.process.log %}
+                    <tr>
+                        <td>{{ l.time }}</td>
+                        <td>{{ l.user }}</td>
+                        <td>{{ l.action }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}

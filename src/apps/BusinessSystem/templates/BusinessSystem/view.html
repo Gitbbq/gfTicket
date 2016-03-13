@@ -1,0 +1,80 @@
+{% extends 'BusinessSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>{{ system.title }}
+                <small>{% if system.bs %}{{ system.url }}{% endif %}</small>
+            </h3>
+        </div>
+        {% if system.public_documents %}
+            <div class="col-md-12">
+
+                <hr/>
+                <p class="text-center">相关公共文档</p>
+                {% for document in system.public_documents %}
+                    <div class="panel panel-{{ document.css_style }}">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><a href="{% url 'Document:view' document.db_uuid %}">
+                                {{ document.title }}
+                            </a>
+                                <small>--{{ document.db_modified|format_datetime:"y/M/d" }}，</small>
+                            </h3>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div class="clearfix"></div>
+            </div>
+        {% endif %}
+        {% if system.public_downloads %}
+            <div class="col-md-12">
+                <hr/>
+                <p class="text-center">相关下载</p>
+
+
+                <!-- Table -->
+                <table id="system_table" class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>说明</th>
+                        <th>文件名</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for download in system.public_downloads %}
+                        <tr>
+                            <td>{{ download.manual|markdown|safe }}</td>
+                            <td><a href="{{ download.orig_file.url }}">{{ download.filename }}</a></td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+
+            </div>
+        {% endif %}
+
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#system_table').DataTable({
+                "paging": false,
+                "info": false,
+                "searching": false
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+
+
+{% block page_content %}
+    <div class="row">
+
+        <h2>我的工单</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+            <h4>日常工单</h4>
+            <table class="table table-bordered " id="ticket_table">
+
+                <thead>
+                <tr>
+                    <th>计划时间</th>
+                    <th>网点</th>
+                    <th>联系人</th>
+                    <th>故障现象</th>
+                    <th>标签</th>
+                    <th>相关系统</th>
+                    <th>相关硬件</th>
+                    <th>当前处理人</th>
+                    <th>特殊状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ticket in my_ticket %}
+                    <tr class="{% if ticket.after_sale_protection or ticket.push_to_admin %}info
+                    {% elif ticket.completed %}success
+                    {% elif 1.0 < ticket.urgency and ticket.urgency <= 3.0 %}warning
+                    {% elif 3.0 < ticket.urgency %}danger
+                    {% endif %}">
+                        <td>{{ ticket.scheduled_time|date:"m/d G:i" }}</td>
+                        <td>{{ ticket.department.title }}</td>
+                        <td><abbr title="{{ ticket.contact_telephone }}">{{ ticket.contact_name }}</abbr></td>
+                        <td>{% for trouble in ticket.troubles.all %}<abbr title="{{ trouble.detail }}">{{ trouble.title }}</abbr><br/>{% endfor %}</td>
+                        <td>
+                            {% if ticket.tag.all %}
+                                {% for tag in ticket.tag.all %}<abbr title="{{ tag.detail }}">{{ tag.title }}</abbr><br/>{% endfor %}
+                            {% else %}
+                                无
+                            {% endif %}
+                        </td>
+                        <td>{% if ticket.relevant_business.all %}{% for relevant_business in ticket.relevant_business.all %}{{ relevant_business.title }}<br/>{% endfor %}{% else %}
+                            无{% endif %} </td>
+                        <td>{% if ticket.relevant_equipment.all %}{% for relevant_equipment in ticket.relevant_equipment.all %}{{ relevant_equipment.title }}
+                            <br/>{% endfor %}{% else %}无{% endif %}</td>
+                        <td>{{ ticket.responsible_person.user|short_name }}</td>
+                        <td>{% if ticket.push_to_admin %}需要管理员操作{% endif %}{% if ticket.after_sale_protection %}已报维保{% endif %}</td>
+                        <td><a href="{% url "SupportTicketSystem:view_ticket" ticket.db_uuid %}">查看详细</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <h4>项目事件</h4>
+            <table class="table table-bordered " id="project_table">
+
+                <thead>
+                <tr>
+                    <th>计划时间</th>
+                    <th>网点</th>
+                    <th>项目标题</th>
+                    <th>创建者</th>
+                    <th>标签</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in my_event %}
+                    <tr class="{% if 1.0 < event.project.level and event.project.level <= 3.0 %}warning
+                    {% elif 3.0 < event.project.level %}danger
+                    {% endif %}">
+                        <td>{{ event.project.scheduled_time|date:"Y/m/d" }}</td>
+                        <td>{{ event.department.title }}</td>
+                        <td>{{ event.project.title }}</td>
+                        <td>{{ event.project.creator.user|short_name }}</td>
+                        <td>
+                            {% if event.project.tag.all %}
+                                {% for tag in event.project.tag.all %}<abbr title="{{ tag.detail }}">{{ tag.title }}</abbr><br/>{% endfor %}
+                            {% else %}
+                                无
+                            {% endif %}
+                        </td>
+                        <td><a href="{% url "SupportTicketSystem:view_project_event" event.db_uuid %}">查看详细</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <br>
+            <hr>
+            <h4>我最近处理完的工单</h4>
+            <table class="table table-bordered ">
+
+                <thead>
+                <tr>
+                    <th>完成时间</th>
+                    <th>网点</th>
+                    <th>联系人</th>
+                    <th>故障现象</th>
+                    <th>标签</th>
+                    <th>相关系统</th>
+                    <th>相关硬件</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ticket in my_completed_ticket %}
+                    <tr>
+                        <td><abbr title="计划日期：{{ ticket.scheduled_time|date:"Y-m-d G:i" }}">{{ ticket.scheduled_time|date:"m/d G:i" }}</abbr></td>
+                        <td><abbr title="{{ ticket.get_incidence_display }}">{{ ticket.department.title }}</abbr></td>
+                        <td><abbr title="{{ ticket.contact_telephone }}">{{ ticket.contact_name }}</abbr></td>
+                        <td>{% for trouble in ticket.troubles.all %}<abbr title="{{ trouble.detail }}">{{ trouble.title }}</abbr><br/>{% endfor %}</td>
+                        <td>
+                            {% if ticket.tag.all %}
+                                {% for tag in ticket.tag.all %}<abbr title="{{ tag.detail }}">{{ tag.title }}</abbr><br/>{% endfor %}
+                            {% else %}
+                                无
+                            {% endif %}
+                        </td>
+                        <td>{% if ticket.relevant_business.all %}{% for relevant_business in ticket.relevant_business.all %}{{ relevant_business.title }}<br/>{% endfor %}{% else %}
+                            无{% endif %} </td>
+                        <td>{% if ticket.relevant_equipment.all %}{% for relevant_equipment in ticket.relevant_equipment.all %}{{ relevant_equipment.title }}
+                            <br/>{% endfor %}{% else %}无{% endif %}</td>
+                        <td><a href="{% url "SupportTicketSystem:view_ticket" ticket.db_uuid %}">查看详细</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <h4>完成的项目事件</h4>
+            <table class="table table-bordered ">
+
+                <thead>
+                <tr>
+                    <th>完成时间</th>
+                    <th>网点</th>
+                    <th>项目标题</th>
+                    <th>完成者</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in completed_event %}
+                    <tr>
+                        <td>{{ event.completed_time|date:"Y/m/d" }}</td>
+                        <td>{{ event.department.title }}</td>
+                        <td>{{ event.project.title }}</td>
+                        <td>{{ event.completed_person.user|short_name }}</td>
+                        <td><a href="{% url "SupportTicketSystem:view_project_event" event.db_uuid %}">查看详细</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <hr/>
+    <p> 所辖网点：
+        {% for department in my_department %}{{ department.title }}、{% endfor %}
+    </p>
+
+
+
+    <script>
+        $(document).ready(function () {
+            $('#ticket_table').DataTable({
+                "paging": false,
+                "info": false,
+                "order": [[8, "asc"]]
+            });
+            $('#project_table').DataTable({
+                "paging": false,
+                "info": false,
+            });
+        });
+    </script>
+{% endblock %}

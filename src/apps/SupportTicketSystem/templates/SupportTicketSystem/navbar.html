@@ -1,0 +1,27 @@
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">工单<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+
+
+        {% if request.user.support_ticket_system_user.is_admin or request.user.support_ticket_system_user.is_watcher %}
+            <li><a href="{% url "SupportTicketSystem:admin" %}">管理视图</a></li>
+            <li role="separator" class="divider"></li>
+        {% endif %}
+
+        {% if request.user.support_ticket_system_user.is_worker %}
+            <li><a href="{% url "SupportTicketSystem:me" %}">我的工单</a></li>
+            <li role="separator" class="divider"></li>
+        {% endif %}
+
+        {% if request.user.support_ticket_system_user.is_admin or request.user.support_ticket_system_user.is_watcher %}
+
+            <li><a href="{% url "SupportTicketSystem:create_ticket" %}">添加新队列</a></li>
+            {% if request.user.support_ticket_system_user.is_admin %}
+                <li><a href="{% url "SupportTicketSystem:create_project" %}">添加项目(批量事件)</a></li>
+            {% endif %}
+{#            <li role="separator" class="divider"></li>#}
+        {% endif %}
+{#        <li><a href="">这个网点的工单</a></li>#}
+    </ul>
+</li>

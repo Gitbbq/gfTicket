@@ -1,0 +1,99 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2>提交新工单
+                <small>必要信息</small>
+            </h2>
+        </div>
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+
+                {% for hidden in form2.hidden_fields %}
+                    {% bootstrap_field hidden %}
+                    {% if hidden.errors %}
+                        {% for error in hidden.errors %}
+                            {% bootstrap_alert error 'warning' %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% for hidden in form1.hidden_fields %}
+                    {% bootstrap_field hidden %}
+                    {% if hidden.errors %}
+                        {% for error in hidden.errors %}
+                            {% bootstrap_alert error 'warning' %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="form-group">
+                    <label class="control-label" for="id_form2-department">网点/部门</label>
+                    <select multiple="multiple" class="form-control input-sm"
+                            id="id_form2-department" name="form2-department" required="required"
+                            title="输入行所或缩写快速查找。">
+                        {% for department_type in department_types %}
+                            <optgroup label='{{ department_type.title }}'>
+                                {% for department in department_type.active_departments %}
+                                    <option value='{{ department.id }}'>{{ department.dot_code }}-{{ department.title }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+
+                    </select>
+                    <span class="help-block">点击标题添加。</span>
+                </div>
+
+                {#        {% for field in form2.visible_fields %}#}
+                {#            {% bootstrap_field field size="small" %}#}
+                {#        {% endfor %}#}
+                {% for field in form1.visible_fields %}
+                    {% bootstrap_field field size="small" %}
+                {% endfor %}
+
+                {% bootstrap_form_errors form2 %}
+                {% bootstrap_form_errors form1 %}
+
+
+                {% buttons submit='下一步' %}{% endbuttons %}
+            </form>
+        </div>
+        <div class="col-md-12">
+            <hr/>
+            <p>参数维护</p>
+            <a class="btn btn-default" href="{% url 'admin:BranchManager_department_changelist' %}" role="button">部门</a>
+            <a class="btn btn-default" href="{% url 'admin:SupportTicketSystem_trouble_changelist' %}" role="button">故障现象</a>
+            <a class="btn btn-default" href="{% url 'admin:SupportTicketSystem_tag_changelist' %}" role="button">标签</a>
+            <a class="btn btn-default" href="{% url 'admin:BusinessSystem_system_changelist' %}" role="button">涉及系统</a>
+            <a class="btn btn-default" href="{% url 'admin:Equipment_equipmentmodel_changelist' %}" role="button">硬件设备</a>
+        </div>
+    </div>
+    {#    {{ form }}#}
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#id_form1-tag").select2({language: "zh-CN"});
+            $("#id_form1-relevant_business").select2({language: "zh-CN"});
+            $("#id_form1-relevant_equipment").select2({language: "zh-CN"});
+            $('#id_form2-department').multiSelect({selectableOptgroup: true});
+
+            $('#id_form1-scheduled_time').datepicker({
+                format: "yyyy-mm-dd",
+                weekStart: 7,
+                todayBtn: true,
+                language: "zh-CN",
+                daysOfWeekHighlighted: "1,2,3,4,5",
+                todayHighlight: true
+            });
+        });
+
+    </script>
+
+
+
+
+{% endblock %}

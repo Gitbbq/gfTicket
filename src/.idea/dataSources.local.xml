@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="Django default" uuid="a5bf7d87-cf30-48de-b6a7-6d1a1dcac2f1">
+      <user-name>postgres</user-name>
+      <user-password>dfebdfcbdf9bdf98df99df9edf9fdf9c</user-password>
+      <schema-pattern>omc_dev.pg_catalog omc_dev.public</schema-pattern>
+      <default-schemas>omc_dev.public</default-schemas>
+    </data-source>
+  </component>
+</project>

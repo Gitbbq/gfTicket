@@ -1,0 +1,32 @@
+{% extends 'Document/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                选择标签
+            </p>
+            <hr/>
+
+
+            {% for tag in tags %}
+
+
+                <a class="btn btn-default" href="{% url 'Document:tag_view' tag.db_uuid %}" role="button">{{ tag.title }} <span class="badge">{{ tag.count }}</span></a>
+
+
+
+
+            {% endfor %}
+
+
+        </div>
+    </div>
+
+
+{% endblock %}

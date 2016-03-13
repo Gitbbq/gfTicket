@@ -1,0 +1,94 @@
+{% extends 'SupportTicketSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+{% load django_markdown %}
+
+
+{% block page_content %}
+
+    <div class="row">
+        <h2>项目信息-{{ project.title }}</h2>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <hr/>
+            <p class="text-left"><strong>主要信息</strong></p>
+            <p class="text-left {% if 1.0 < project.level and project.level <= 3.0 %}bg-warning{% elif 3.0 < project.level %}bg-danger{% endif %}">
+                登记时间：{{ project.start_time|date:"Y/m/d G:i" }}<br/>
+                登记人：{{ project.creator.user|short_name }}<br/>
+                计划时间：{{ project.scheduled_time|date:"m/d G:i" }}<br/>
+                优先级：{{ project.level }}<br/>
+            </p>
+            {% if project.detail %}
+                <hr/>
+                <p class="text-left"><strong>详情</strong></p>
+                <p class="text-left">
+                    {{ project.detail|markdown|safe }}
+                </p>
+            {% endif %}
+            <hr/>
+            <p class="text-left"><strong>次要信息</strong></p>
+            <p class="text-left {% if 1.0 < project.level and project.level <= 3.0 %}bg-warning{% elif 3.0 < project.level %}bg-danger{% endif %}">
+                标签： {% for tag in project.tag.all %}{{ tag.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+                相关系统：
+                {% for relevant_business in project.relevant_business.all %}{{ relevant_business.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+                相关硬件：
+                {% for relevant_equipment in project.relevant_equipment.all %}{{ relevant_equipment.title }}{% if not forloop.last %}、{% endif %}{% empty %}无{% endfor %}<br/>
+            </p>
+            {% if project.completed %}
+                <hr/>
+                <p class="text-left">完成时间：{{ project.completed_time|date:"m/d G:i" }}<br/>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <hr/>
+            <p class="text-left"><strong>公共附件</strong></p>
+            <p>
+                {% for file in project.files.all %}
+                    <a href="{{ file.orig_file.url }}">{{ file.filename }}</a><br/>
+                {% endfor %}
+            </p>
+            <form action="" method="post" class="form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% bootstrap_form file_form layout='inline' %}{% buttons submit='上传附件' %}{% endbuttons %}
+
+            </form>
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+            <h4>详细</h4>
+            <table class="table table-bordered ">
+
+                <thead>
+                <tr>
+                    <th>网点</th>
+                    <th>可处理人</th>
+                    <th>完成日期</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in project.events.all %}
+                    <tr class="{% if event.completed %}success{% else %}danger{% endif %}">
+                        <td><a href="{% url "SupportTicketSystem:view_project_event" event.db_uuid %}">{{ event.department.title }}</a></td>
+                        <td>{% for p in event.who_can_handle %}{{ p.user|short_name }}{% if not forloop.last %},{% endif %}{% endfor %}</td>
+                        <td>{{ event.completed_time|date:"Y/m/d G:i" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'bootstrap3.html' %}
+{% load SSO %}
+{% block bootstrap3_title %} 北京分行运维平台 {% endblock %}
+
+{% block bootstrap3_extra_head %}{% block extra_head %}{% endblock %}{% endblock %}
+
+
+
+{% block bootstrap3_content %}
+
+    {% block navbar %}
+        <div class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">{% block project_name %}北京分行运维平台{% endblock %}</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    {% block navbar_tree %}
+                        <ul class="nav navbar-nav">
+                            {% if  request.user.support_ticket_system_user %}{% include "SupportTicketSystem/navbar.html" %}{% endif %}
+
+                            {% include "Document/navbar.html" %}
+                            {% include "DownloadCenter/navbar.html" %}
+                            {% if  request.user.attendance_system_user %}{% include "AttendanceSystem/navbar.html" %}{% endif %}
+
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                                   aria-expanded="false">公共信息 <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    {% include "BusinessSystem/navbar.html" %}
+
+
+                                </ul>
+                            </li>
+
+                        </ul>
+                    {% endblock %}
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if not request.user.is_authenticated %}
+                            <li><a href="{% url 'SSO:login' %}?next={{ request.path | urlencode }}">登录</a></li>
+                        {% else %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    {#                                                                        <img src="#">#}
+                                    {{ request.user|short_name }} <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a>{{ request.user|nickname }}</a></li>
+                                    <li><a href="{% url "SSO:logout" %}?next={{ request.path | urlencode }}">注销</a></li>
+                                    {% if request.session.is_domain_user and not request.session.verified %}
+                                        <li><a href="{% url "SSO:verified" %}?next={{ request.path | urlencode }}">认证</a></li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    {% endblock %}
+
+
+
+    {% block content %}
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+
+            {% block page_content %}
+            {% endblock %}
+
+
+        </div>
+
+        {% block footer %}
+            <footer class="footer">
+
+                <div class="container">
+
+                    <hr/>
+                    <p class="text-center">您的IP地址：{{ request.META.REMOTE_ADDR }}</p>
+                    <p class="text-center"> &copy; {% now "Y" %}
+                    </p>
+                </div>
+            </footer>
+        {% endblock %}
+
+
+    {% endblock %}
+
+
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+{% block bootstrap3_extra_script %}
+
+    {% block extra_script %}
+    {% endblock %}
+{% endblock %}

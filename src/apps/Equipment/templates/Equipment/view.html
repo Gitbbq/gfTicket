@@ -1,0 +1,81 @@
+{% extends 'Equipment/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load django_markdown %}
+{% load local_time_format %}
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>{{ equipment_model.title }}
+            </h3>
+        </div>
+        {% if equipment_model.public_documents %}
+            <div class="col-md-12">
+
+                <hr/>
+                <p class="text-center">相关公共文档</p>
+                {% for document in equipment_model.public_documents %}
+                    <div class="panel panel-{{ document.css_style }}">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><a href="{% url 'Document:view' document.db_uuid %}">
+                                {{ document.title }}
+                            </a>
+                                <small>--{{ document.db_modified|format_datetime:"y/M/d" }}，</small>
+                            </h3>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div class="clearfix"></div>
+            </div>
+        {% endif %}
+        {% if equipment_model.public_downloads %}
+            <div class="col-md-12">
+                <hr/>
+                <p class="text-center">相关驱动</p>
+
+
+                <!-- Table -->
+                <table id="driver_table" class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                    <th>兼容性</th>
+                    <th>下载</th>
+                    <th>说明</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for driver in equipment_model.public_downloads %}
+                        <tr>
+                        <td>{{ driver.get_os_compatibility_display }}</td>
+                        <td><a href="{{ driver.orig_file.url }}">{{ driver.filename }}</a></td>
+                        <td>{{ driver.manual|markdown|safe }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+
+            </div>
+        {% endif %}
+
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#driver_table').DataTable({
+                "paging": false,
+                "info": false,
+                "searching": false
+            });
+        });
+    </script>
+{% endblock %}

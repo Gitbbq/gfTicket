@@ -1,0 +1,41 @@
+{% extends 'AttendanceSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load local_time_format %}
+{% load SSO %}
+
+
+
+
+
+
+{% block page_content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>在岗状态</h2>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-hover table-condensed">
+                <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for worker in workers %}
+                    <tr>
+                        <th>{{ worker.user|short_name }}</th>
+                        <th>{% if worker.on_duty %}在岗{% endif %}</th>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+
+        </div>
+    </div>
+{% endblock %}
