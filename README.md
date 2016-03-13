@@ -82,7 +82,6 @@
 * Postgresql >=9.4
 * memcached >= 1.4
 * redis >= 2.8
-
 * 在Windows下，使用[rq-win](https://github.com/michaelbrooks/rq-win)可使用全部功能，但性能受限。
 * 推荐在debian linux下部署生产环境。
 
