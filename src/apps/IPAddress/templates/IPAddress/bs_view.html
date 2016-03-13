@@ -1,0 +1,56 @@
+{% extends 'BusinessSystem/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+{% block page_content %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <h3>常用业务系统网址</h3>
+            <table id="bs_table" class="table table-bordered table-striped">
+
+                <thead>
+                <tr>
+                    <th>系统</th>
+                    <th>网址</th>
+                    <th>文档/下载</th>
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for system in bs_system %}
+                    <tr>
+                        <td>{{ system.title }}</td>
+                        <td><a target="_blank" href="{{ system.url }}">{{ system.url }}</a></td>
+                        <td>
+                            {% if system.public_documents or system.public_downloads %}<a target="_blank" href="{% url "BusinessSystem:system_view" system.db_uuid %}">查看</a>
+                            {% else %}
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+        <div class="col-md-12">
+            <p class="text-center"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><a href="mailto:liantian@office.cgbchina?subject=常用业务系统地址需要维护">需要添加？</a></p>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            $('#bs_table').DataTable({
+                "paging": false,
+                "info": false
+            });
+        });
+    </script>
+{% endblock %}

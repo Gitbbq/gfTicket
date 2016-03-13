@@ -16,32 +16,27 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 # Stdlib imports
+
 # Core Django imports
+from django.conf.urls import url
 
 # Third-party app imports
-from apps.Core.views import BaseView
 
 # Imports from your apps
-from .models import System as BusinessSystem
 
 
-#
+# from .views import BSView
+# from .views import BusinessSystemView
 
-class BSView(BaseView):
-    template_name = "BusinessSystem/bs_view.html"
-
-    def get(self, request):
-        self.response_dict["bs_system"] = BusinessSystem.objects.filter(bs=True).filter(db_active=True).all()
-        return self.response()
-
-
-class BusinessSystemView(BaseView):
-    template_name = "BusinessSystem/view.html"
-
-    def get(self, request, db_uuid):
-        self.response_dict["db_uuid"] = db_uuid
-        system = BusinessSystem.objects.get(db_uuid=self.response_dict["db_uuid"])
-        self.response_dict["system"] = system
-        return self.response()
+app_name = 'IPAddress'
+urlpatterns = [
+#     url(regex=r'^bs$',
+#         view=BSView.as_view(),
+#         name="bs_view",
+#         ),
+#     url(regex=r'^system/(?P<db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
+#         view=BusinessSystemView.as_view(),
+#         name="system_view",
+#         ),
+]
