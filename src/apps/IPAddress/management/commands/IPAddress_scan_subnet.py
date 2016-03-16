@@ -17,9 +17,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 # Stdlib imports
-from datetime import datetime, timedelta
-from rq import Queue
+import os
+
 from redis import Redis
+from rq import Queue
+
 # Core Django imports
 
 
@@ -28,7 +30,8 @@ from django.core.management.base import BaseCommand
 
 # Imports from your apps
 
-from ...models import Host
+from ...models import Subnet
+from ...controller import scan_subnet
 
 redis_conn = Redis()
 
@@ -36,14 +39,9 @@ redis_conn = Redis()
 class Command(BaseCommand):
     help = 'scan Host'
 
-    def add_arguments(self, parser):
-        # Positional arguments
-        parser.add_argument('--count', '-c', default=500, type=int, dest='count')
-
     def handle(self, *args, **options):
-        q = Queue('scan_host', connection=redis_conn)
+        q = Queue('scan_subnet', connection=redis_conn)
         q.empty()
-        count = options['count']
-        hosts = Host.objects.order_by("latest_scan_time")[:count]
-        for host in hosts:
-            q.enqueue(host._scan)
+        all_subnet = Subnet.objects.order_by("latest_scan_time").all()
+        for subnet in all_subnet:
+            q.enqueue(scan_subnet, subnet, max_workers=(os.cpu_count() or 1) * 10)

@@ -18,8 +18,8 @@
 # under the License.
 
 # Stdlib imports
-from rq import Queue
 from redis import Redis
+from rq import Queue
 
 # Core Django imports
 from django.contrib import admin
@@ -28,6 +28,7 @@ from django.contrib import admin
 
 # Imports from your apps
 from .models import Host, Subnet
+from .controller import init_subnet, scan_host, scan_subnet
 
 # Register your models here.
 
@@ -35,16 +36,24 @@ redis_conn = Redis()
 
 
 class SubnetAdmin(admin.ModelAdmin):
-    list_display = ('summary', 'subnet_address', 'mask', 'department')
-    actions = ['init_hosts']
+    list_display = ('summary', 'subnet_address', 'mask', 'department', 'latest_scan_time')
+    actions = ['_init_subnet', '_scan_subnet']
 
-    def init_hosts(self, request, queryset):
+    def _init_subnet(self, request, queryset):
         q = Queue('low', connection=redis_conn)
         for obj in queryset:
-            q.enqueue(obj._init_hosts)
+            q.enqueue(init_subnet, obj)
         self.message_user(request, "已加入处理队列，请稍后查询")
 
-    init_hosts.short_description = "初始化子网"
+    _init_subnet.short_description = "初始化子网"
+
+    def _scan_subnet(self, request, queryset):
+        q = Queue('low', connection=redis_conn)
+        for obj in queryset:
+            q.enqueue(scan_subnet, obj)
+        self.message_user(request, "已加入处理队列，请稍后查询")
+
+    _scan_subnet.short_description = "扫描整个子网"
 
 
 admin.site.register(Subnet, SubnetAdmin)
@@ -60,7 +69,7 @@ class HostAdmin(admin.ModelAdmin):
     def scan(self, request, queryset):
         q = Queue('low', connection=redis_conn)
         for obj in queryset:
-            q.enqueue(obj._scan)
+            q.enqueue(scan_host, obj)
         self.message_user(request, "已加入处理队列，请稍后查询")
 
     scan.short_description = "扫描延迟和主机名"

@@ -21,13 +21,10 @@
 
 # Stdlib imports
 import ipaddress
-from nmb.NetBIOS import NetBIOS
-import django_rq
 
 # Core Django imports
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.db.utils import IntegrityError
 from django.utils import timezone
 
 # Third-party app imports
@@ -36,8 +33,6 @@ from django.utils import timezone
 # Imports from your apps
 from apps.Core.models import CommonModel
 from apps.BranchManager.models import Department
-
-from .ping import quiet_ping
 
 
 class Subnet(CommonModel):
@@ -54,38 +49,7 @@ class Subnet(CommonModel):
 
     been_init = models.BooleanField(default=False, editable=False)
 
-    def _init_hosts(self):
-        _interface = ipaddress.ip_interface(self.subnet_address + "/" + self.mask)
-        _networks = _interface.network
-
-        self.mask = str(_networks.netmask)
-        self.subnet_address = str(_networks.network_address)
-        try:
-            self.save()
-        except IntegrityError:
-            self.delete()
-            return
-
-        _host_ip_str_list = []
-        for _host_ip in list(_networks.hosts()):
-            _host_ip_str_list.append(str(_host_ip))
-
-        for exist_host in self.hosts.all():
-            if str(exist_host.ip_address) in _host_ip_str_list:
-                if not exist_host.mask == self.mask:
-                    exist_host.mask = self.mask
-                    exist_host.save()
-                _host_ip_str_list.remove(str(exist_host.ip_address))
-            else:
-                exist_host.delete()
-        need_create_host = []
-        for _host_ip_str in _host_ip_str_list:
-            host = Host(ip_address=_host_ip_str, mask=self.mask, subnet=self)
-            need_create_host.append(host)
-
-        Host.objects.bulk_create(need_create_host)
-        self.been_init = True
-        self.save()
+    latest_scan_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后扫描时间"))
 
     def cidr(self):
         return str(ipaddress.ip_interface(self.subnet_address + "/" + self.mask).network)
@@ -121,7 +85,7 @@ class Host(CommonModel):
     # ping_latest_time = models.DateTimeField(default=timezone.datetime.now)
     # 最近一次成功的ping
     ping_last_success_delay = models.FloatField(verbose_name=_("延迟"), null=True, blank=True)
-    ping_last_success_fraction_loss = models.FloatField(verbose_name=_("丢包率"), null=True, blank=True)
+    # ping_last_success_fraction_loss = models.FloatField(verbose_name=_("丢包率"), null=True, blank=True)
     ping_last_success_time = models.DateTimeField(verbose_name=_("最后ping通"), null=True, blank=True)
 
     def latest_scan_time_hours(self):
@@ -138,21 +102,6 @@ class Host(CommonModel):
 
     def ping_last_success_days(self):
         return ((timezone.datetime.now() - self.ping_last_success_time).total_seconds()) / 86400
-
-    def _scan(self, ping_timeout=1000, ping_packet=3, smb_timeout=3):
-        maxTime, minTime, avrgTime, fracLoss = quiet_ping(hostname=self.ip_address, timeout=ping_timeout, count=ping_packet, path_finder=True)
-        if fracLoss < 1.0:
-            self.ping_last_success_time = timezone.datetime.now()
-            self.ping_last_success_delay = avrgTime
-            self.ping_last_success_fraction_loss = fracLoss
-        n = NetBIOS()
-        try:
-            self.hostname = n.queryIPForName(self.ip_address, timeout=smb_timeout)[0]
-        except:
-            pass
-        n.close()
-        self.latest_check_time = timezone.datetime.now()
-        self.save()
 
     def __unicode__(self):
         return self.ip_address

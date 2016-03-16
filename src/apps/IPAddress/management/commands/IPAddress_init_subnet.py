@@ -17,8 +17,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 # Stdlib imports
-from rq import Queue
 from redis import Redis
+from rq import Queue
+
 # Core Django imports
 
 from django.core.management.base import BaseCommand
@@ -27,6 +28,7 @@ from django.core.management.base import BaseCommand
 # Imports from your apps
 
 from ...models import Subnet
+from ...controller import init_subnet
 
 redis_conn = Redis()
 
@@ -38,4 +40,4 @@ class Command(BaseCommand):
         q = Queue('low', connection=redis_conn)
         queryset = Subnet.objects.filter(been_init=False).all()
         for obj in queryset:
-            q.enqueue(obj._init_hosts)
+            q.enqueue(init_subnet, obj)
