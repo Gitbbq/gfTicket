@@ -1,0 +1,2 @@
+ping.py:
+Try socket.AF_PACKET instead of socket.AF_INET.
