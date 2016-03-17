@@ -214,6 +214,8 @@ import struct
 import sys
 import time
 
+
+
 __description__ = 'A pure python ICMP ping implementation using raw sockets.'
 
 if sys.platform == "win32":
@@ -249,6 +251,18 @@ class MyStats:
 
 
 myStats = MyStats  # NOT Used globally anymore.
+
+
+## http://stackoverflow.com/questions/8888880/python-icmp-ping-implementation-when-pinging-multiple-ips-from-threads
+
+try:
+    from thread import get_ident
+except ImportError:
+    try:
+        from _thread import get_ident
+    except ImportError:
+        def get_ident():
+            return 0
 
 
 # =============================================================================#
@@ -307,13 +321,15 @@ def do_one(myStats, destIP, hostname, timeout, mySeqNumber, packet_size, quiet=F
     delay = None
 
     try:  # One could use UDP here, but it's obscure
-        mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
+        # mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
+        mySocket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
     except socket.error as e:
         print("failed. (socket error: '%s')" % e.args[1])
         raise  # raise the original error
 
-    my_ID = os.getpid() & 0xFFFF
-
+    # my_ID = os.getpid() & 0xFFFF
+    my_ID = (get_ident() ^ os.getpid()) & 0xFFFF
+    
     sentTime = send_one_ping(mySocket, destIP, my_ID, mySeqNumber, packet_size)
     if sentTime == None:
         mySocket.close()
