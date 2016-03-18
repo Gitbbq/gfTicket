@@ -31,17 +31,21 @@ from django.core.management.base import BaseCommand
 # Imports from your apps
 
 from ...models import Subnet
-from ...controller import scan_subnet
+from ...controller import reverse_subnet
 
 redis_conn = Redis()
 
 
 class Command(BaseCommand):
-    help = 'scan Host'
+    help = 'reverse host\'s hostname in subnet'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--count', '-c', default=100, type=int, dest='count')
 
     def handle(self, *args, **options):
-        q = Queue('scan_subnet', connection=redis_conn)
+        q = Queue('reverse_subnet', connection=redis_conn)
         q.empty()
-        all_subnet = Subnet.objects.order_by("latest_scan_time").all()
+        count = options['count']
+        all_subnet = Subnet.objects.order_by("reverse_latest_time").all()[:count]
         for subnet in all_subnet:
-            q.enqueue(scan_subnet, subnet, max_workers=(os.cpu_count() or 1) * 10)
+            q.enqueue(reverse_subnet, subnet)

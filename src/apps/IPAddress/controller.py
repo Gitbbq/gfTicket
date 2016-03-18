@@ -3,8 +3,12 @@
 # __author__ = 'Liantian'
 # __email__ = "liantian.me+noreply@gmail.com"
 # Stdlib imports
+import sys
+import re
 import concurrent.futures
 import ipaddress
+import subprocess
+import pprint
 
 from nmb.NetBIOS import NetBIOS
 # Core Django imports
@@ -14,11 +18,8 @@ from django.db import transaction
 # Third-party app imports
 
 # Imports from your apps
-from .ping import quiet_ping
 from .models import Host
 
-
-# enqueue(populate_trends, args=(self,), kwargs={'x': 1,}, timeout=500)
 
 def init_subnet(subnet):
     _interface = ipaddress.ip_interface(subnet.subnet_address + "/" + subnet.mask)
@@ -55,44 +56,76 @@ def init_subnet(subnet):
     return subnet
 
 
-def scan_host(host, ping_timeout=500, ping_packet=3, smb_timeout=2, save=True):
-    maxTime, minTime, avrgTime, fracLoss = quiet_ping(hostname=host.ip_address, timeout=ping_timeout, count=ping_packet, path_finder=True)
-    if ping_packet > 3:
-        fracLoss_cap = 0.3
+def ping_host(host, count=1, timeout=1, save=True):
+    if sys.platform == "win32":
+        p = subprocess.Popen(['ping', '-n', str(1), '-w', str(timeout * 1000), host.ip_address], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-        fracLoss_cap = 0
-    if fracLoss <= fracLoss_cap:
-        host.ping_last_success_time = timezone.datetime.now()
-        host.ping_last_success_delay = maxTime
-    n = NetBIOS()
-    try:
-        host.hostname = n.queryIPForName(host.ip_address, timeout=smb_timeout)[0]
-    except:
-        pass
-    n.close()
-    host.latest_scan_time = timezone.datetime.now()
+        p = subprocess.Popen(['/bin/ping', '-c', str(count), '-W', str(timeout), host.ip_address], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate(timeout=count * (timeout + 5))
+    host.ping_stdout = str(out)
+    host.ping_latest_time = timezone.datetime.now()
+    if p.returncode == 0:
+        host.ping_last_success_time = host.ping_latest_time
     if save:
         host.save()
     return host
 
 
-def scan_subnet(subnet, ping_timeout=3000, ping_packet=5, smb_timeout=2, max_workers=None):
+def ping_subnet(subnet):
+    if sys.platform == "win32":
+        # no fping in windows =.=!
+        return subnet
+    else:
+        p = subprocess.Popen(['/usr/bin/fping', '-g', subnet.cidr(), '-c1', '-q'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = p.communicate(timeout=120)
+
+    fping_regex = re.compile('(?P<ip_address>^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*(?P<xmt>\d{1,2})\/(?P<rcv>\d{1,2})\/(?P<loss>\d{1,3})%.*', re.DOTALL)
+    fping_result = {}
+
+    for line in error.decode().splitlines():
+        try:
+            fping_result[fping_regex.search(line).groupdict()["ip_address"]] = int(fping_regex.search(line).groupdict()["loss"])
+        except:
+            pass
+
+    pprint.pprint(fping_result)
+    with transaction.atomic():
+        for host in subnet.hosts.all():
+            host.ping_latest_time = timezone.datetime.now()
+            if fping_result.get(host.ip_address, 1) == 0:
+                host.ping_last_success_time = timezone.datetime.now()
+            host.save()
+        subnet.ping_latest_time = timezone.datetime.now()
+        subnet.save()
+
+    return subnet
+
+
+def reverse_host(host, timeout=1, save=True):
+    n = NetBIOS()
+    try:
+        host.hostname = n.queryIPForName(host.ip_address, timeout=timeout)[0]
+    except:
+        pass
+    n.close()
+    host.reverse_latest_time = timezone.datetime.now()
+    if save:
+        host.save()
+    return host
+
+
+def reverse_subnet(subnet):
     host_list = list(subnet.hosts.all())
     scaned_host_list = []
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-
-    futures = [executor.submit(scan_host, host, ping_timeout=ping_timeout, ping_packet=ping_packet, smb_timeout=smb_timeout, save=False) for host in host_list]
-
+    executor = concurrent.futures.ThreadPoolExecutor()
+    futures = [executor.submit(reverse_host, host, save=False) for host in host_list]
     for future in concurrent.futures.as_completed(futures, timeout=120):
         scaned_host_list.append(future.result())
     executor.shutdown()
 
-    # print(scaned_host_list)
-
     with transaction.atomic():
-        # This code executes inside a transaction.
         for host in scaned_host_list:
             host.save()
-        subnet.latest_scan_time = timezone.datetime.now()
+        subnet.reverse_latest_time = timezone.datetime.now()
         subnet.save()
     return subnet

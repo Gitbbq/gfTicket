@@ -28,7 +28,7 @@ from django.contrib import admin
 
 # Imports from your apps
 from .models import Host, Subnet
-from .controller import init_subnet, scan_host, scan_subnet
+from .controller import init_subnet, ping_host, ping_subnet, reverse_host, reverse_subnet
 
 # Register your models here.
 
@@ -36,8 +36,8 @@ redis_conn = Redis()
 
 
 class SubnetAdmin(admin.ModelAdmin):
-    list_display = ('summary', 'subnet_address', 'mask', 'department', 'latest_scan_time')
-    actions = ['_init_subnet', '_scan_subnet']
+    list_display = ('summary', 'subnet_address', 'mask', 'department', 'ping_latest_time', 'reverse_latest_time')
+    actions = ['_init_subnet', 'ping', 'reverse']
 
     def _init_subnet(self, request, queryset):
         q = Queue('low', connection=redis_conn)
@@ -47,13 +47,21 @@ class SubnetAdmin(admin.ModelAdmin):
 
     _init_subnet.short_description = "初始化子网"
 
-    def _scan_subnet(self, request, queryset):
+    def ping(self, request, queryset):
         q = Queue('low', connection=redis_conn)
         for obj in queryset:
-            q.enqueue(scan_subnet, obj)
+            q.enqueue(ping_subnet, obj)
         self.message_user(request, "已加入处理队列，请稍后查询")
 
-    _scan_subnet.short_description = "扫描整个子网"
+    ping.short_description = "Ping"
+
+    def reverse(self, request, queryset):
+        q = Queue('low', connection=redis_conn)
+        for obj in queryset:
+            q.enqueue(reverse_subnet, obj)
+        self.message_user(request, "已加入处理队列，请稍后查询")
+
+    reverse.short_description = "ReverseLookup(IP反查计算机名)"
 
 
 admin.site.register(Subnet, SubnetAdmin)
@@ -61,18 +69,28 @@ admin.site.register(Subnet, SubnetAdmin)
 
 class HostAdmin(admin.ModelAdmin):
     list_per_page = 300
-    list_display = ('ip_address', 'mask', 'subnet', 'description', 'hostname', 'ping_last_success_time', 'ping_last_success_delay', 'latest_scan_time')
+    list_display = ('ip_address', 'mask', 'subnet', 'description', 'hostname', 'ping_last_success_time', 'ping_latest_time')
     list_filter = ['subnet']
     search_fields = ['ip_address', 'hostname']
-    actions = ['scan']
+    actions = ['ping', 'reverse']
 
-    def scan(self, request, queryset):
+    def ping(self, request, queryset):
         q = Queue('low', connection=redis_conn)
         for obj in queryset:
-            q.enqueue(scan_host, obj)
+            q.enqueue(ping_host, obj, save=True)
         self.message_user(request, "已加入处理队列，请稍后查询")
 
-    scan.short_description = "扫描延迟和主机名"
+    ping.short_description = "Ping"
+
+    def reverse(self, request, queryset):
+        q = Queue('low', connection=redis_conn)
+        for obj in queryset:
+            q.enqueue(reverse_host, obj, save=True)
+        self.message_user(request, "已加入处理队列，请稍后查询")
+
+    reverse.short_description = "ReverseLookup(IP反查计算机名)"
+
+
 
 
 

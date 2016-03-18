@@ -49,7 +49,8 @@ class Subnet(CommonModel):
 
     been_init = models.BooleanField(default=False, editable=False)
 
-    latest_scan_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后扫描时间"))
+    reverse_latest_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后一次主机名反查日期"))
+    ping_latest_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后Ping时间"))
 
     def cidr(self):
         return str(ipaddress.ip_interface(self.subnet_address + "/" + self.mask).network)
@@ -75,7 +76,7 @@ class Host(CommonModel):
     subnet = models.ForeignKey(to=Subnet, verbose_name=_("子网"), related_name="hosts")
     description = models.TextField(max_length=255, default="None", verbose_name=_("详细描述"))
 
-    latest_scan_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后扫描时间"))
+    reverse_latest_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后一次主机名反查日期"))
 
     # Reverse lookup
     hostname = models.CharField(max_length=255, verbose_name=_("主机名"), null=True, blank=True, default=None)
@@ -84,15 +85,17 @@ class Host(CommonModel):
     # 最近一次ping
     # ping_latest_time = models.DateTimeField(default=timezone.datetime.now)
     # 最近一次成功的ping
-    ping_last_success_delay = models.FloatField(verbose_name=_("延迟"), null=True, blank=True)
+    # ping_last_success_delay = models.FloatField(verbose_name=_("延迟"), null=True, blank=True)
     # ping_last_success_fraction_loss = models.FloatField(verbose_name=_("丢包率"), null=True, blank=True)
     ping_last_success_time = models.DateTimeField(verbose_name=_("最后ping通"), null=True, blank=True)
+    ping_latest_time = models.DateTimeField(default=timezone.datetime.now, verbose_name=_("最后Ping时间"))
+    ping_stdout = models.TextField(default='=.=!', verbose_name=_("Ping输出"))
 
-    def latest_scan_time_hours(self):
-        return ((timezone.datetime.now() - self.latest_scan_time).total_seconds()) / 3600
+    def ping_latest_hours(self):
+        return ((timezone.datetime.now() - self.ping_latest_time).total_seconds()) / 3600
 
-    def latest_scan_time_minute(self):
-        return ((timezone.datetime.now() - self.latest_scan_time).total_seconds()) / 60
+    def ping_latest_minute(self):
+        return ((timezone.datetime.now() - self.ping_latest_time).total_seconds()) / 60
 
     def ping_last_success_minute(self):
         return ((timezone.datetime.now() - self.ping_last_success_time).total_seconds()) / 60

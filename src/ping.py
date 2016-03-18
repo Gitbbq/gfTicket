@@ -1,24 +1,160 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# __author__ = 'Liantian'
+# __email__ = "liantian.me+noreply@gmail.com"
+# Stdlib imports
 
+# Core Django imports
+
+# Third-party app imports
+
+# Imports from your apps
+ip_list = ["10.74.82.1",
+           "10.74.82.2",
+           "10.74.82.3",
+           "10.74.82.4",
+           "10.74.82.5",
+           "10.74.82.6",
+           "10.74.82.7",
+           "192.168.1.1",
+           "10.74.82.8",
+           "10.74.82.9",
+           "10.74.82.10",
+           "10.74.82.11",
+           "10.74.82.12",
+           "10.74.82.13",
+           "10.74.82.14",
+           "10.74.82.15",
+           "10.74.82.16",
+           "10.74.82.17",
+           "192.168.1.134",
+           "10.74.82.18",
+           "10.74.82.19",
+           "10.74.82.20",
+           "10.74.82.21",
+           "10.74.82.22",
+           "10.74.82.23",
+           "10.74.82.24",
+           "10.74.82.25",
+           "10.74.82.26",
+           "10.74.82.27",
+           "10.74.82.28",
+           "10.74.82.29",
+           "10.74.82.30",
+           "10.74.82.31",
+           "10.74.82.32",
+           "10.74.82.33",
+           "10.74.82.34",
+           "10.74.82.35",
+           "10.74.82.36",
+           "10.74.82.37",
+           "10.74.82.38",
+           "10.74.82.39",
+           "10.74.82.40",
+           "10.74.82.41",
+           "10.74.82.42",
+           "10.74.82.43",
+           "10.74.82.44",
+           "10.74.82.45",
+           "10.74.82.46",
+           "10.74.82.47",
+           "10.74.82.48",
+           "10.74.82.49",
+           "10.74.82.50",
+           "10.74.82.51",
+           "192.168.1.235",
+           "10.74.82.52",
+           "10.74.82.53",
+           "10.74.82.54",
+           "10.74.82.55",
+           "10.74.82.56",
+           "10.74.82.57",
+           "10.74.82.58",
+           "10.74.82.59",
+           "10.74.82.60",
+           "10.74.82.61",
+           "10.74.82.62",
+           "10.74.82.63",
+           "10.74.82.64",
+           "10.74.82.65",
+           "10.74.82.66",
+           "10.74.82.67",
+           "10.74.82.68",
+           "10.74.82.69",
+           "10.74.82.70",
+           "10.74.82.71",
+           "10.74.82.72",
+           "10.74.82.73",
+           "10.74.82.74",
+           "10.74.82.75",
+           "10.74.82.76",
+           "10.74.82.77",
+           "10.74.82.78",
+           "10.74.82.79",
+           "10.74.82.80",
+           "10.74.82.81",
+           "10.74.82.82",
+           "10.74.82.83",
+           "10.74.82.84",
+           "10.74.82.85",
+           "10.74.82.86",
+           "10.74.82.87",
+           "10.74.82.88",
+           "10.74.82.89",
+           "10.74.82.90",
+           "10.74.82.91",
+           "10.74.82.92",
+           "10.74.82.93",
+           "10.74.82.94",
+           "10.74.82.95",
+           "10.74.82.96",
+           "10.74.82.97",
+           "10.74.82.98",
+           "10.74.82.99",
+           "10.74.82.100",
+           "10.74.82.101",
+           "10.74.82.102",
+           "10.74.82.119",
+           "10.74.82.120",
+           "10.74.82.147",
+           "10.74.82.148",
+           "10.74.82.238",
+           "10.74.82.239",
+           "10.74.82.240",
+           "10.74.82.241",
+           "10.74.82.242",
+           "10.74.82.243",
+           "10.74.82.244",
+           "10.74.82.245",
+           "10.74.82.246",
+           "10.74.82.247",
+           "10.74.82.248",
+           "10.74.82.249",
+           "10.74.82.250",
+           "10.74.82.251",
+           "10.74.82.252",
+           "10.74.82.253",
+           "10.74.82.254",
+           ]
+
+import os
+import struct
+import array
+import time
+import socket
+import threading
 import argparse
+import concurrent.futures
 import os, sys, socket, struct, select, time, signal
 
-__description__ = 'A pure python ICMP ping implementation using raw sockets.'
-
 if sys.platform == "win32":
-    # On Windows, the best timer is time.clock()
     default_timer = time.clock
 else:
-    # On most other platforms the best timer is time.time()
     default_timer = time.time
 
 NUM_PACKETS = 3
 PACKET_SIZE = 64
 WAIT_TIMEOUT = 3.0
-
-# =============================================================================#
-# ICMP parameters
 
 ICMP_ECHOREPLY = 0  # Echo reply (per RFC792)
 ICMP_ECHO = 8  # Echo request (per RFC792)
@@ -35,313 +171,201 @@ except ImportError:
         def get_ident():
             return 0
 
-class MyStats:
-    thisIP = "0.0.0.0"
-    pktsSent = 0
-    pktsRcvd = 0
-    minTime = 999999999
-    maxTime = 0
-    totTime = 0
-    avrgTime = 0
-    fracLoss = 1.0
 
+class Ping(object):
+    def __init__(self, my_socket, destination_ip, timeout=500):
+        self.my_socket = my_socket
+        self.destination_ip = destination_ip
+        self.my_id = (get_ident() ^ os.getpid()) & 0xFFFF
+        # self.my_id = os.getpid() & 0xFFFF
+        self.my_sequence_number = 0
+        self.packet_size = 64
+        self.timeout = timeout
 
-myStats = MyStats  # NOT Used globally anymore.
+    def ping_once(self):
+        delay = None
+        sentTime = self.send_one_ping()
 
+        if sentTime == None:
+            return delay
 
-# =============================================================================#
-def checksum(source_string):
-    """
-    A port of the functionality of in_cksum() from ping.c
-    Ideally this would act on the string as a series of 16-bit ints (host
-    packed), but this works.
-    Network data is big-endian, hosts are typically little-endian
-    """
-    countTo = (int(len(source_string) / 2)) * 2
-    sum = 0
-    count = 0
+        recvTime, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = self.receive_one_ping()
 
-    # Handle bytes in pairs (decoding as short ints)
-    loByte = 0
-    hiByte = 0
-    while count < countTo:
-        if (sys.byteorder == "little"):
-            loByte = source_string[count]
-            hiByte = source_string[count + 1]
+        if recvTime:
+            delay = (recvTime - sentTime) * 1000
         else:
-            loByte = source_string[count + 1]
-            hiByte = source_string[count]
-        try:  # For Python3
-            sum = sum + (hiByte * 256 + loByte)
-        except:  # For Python2
-            sum = sum + (ord(hiByte) * 256 + ord(loByte))
-        count += 2
-
-    # Handle last byte if applicable (odd-number of bytes)
-    # Endianness should be irrelevant in this case
-    if countTo < len(source_string):  # Check for odd length
-        loByte = source_string[len(source_string) - 1]
-        try:  # For Python3
-            sum += loByte
-        except:  # For Python2
-            sum += ord(loByte)
-
-    sum &= 0xffffffff  # Truncate sum to 32 bits (a variance from ping.c, which
-    # uses signed ints, but overflow is unlikely in ping)
-
-    sum = (sum >> 16) + (sum & 0xffff)  # Add high 16 bits to low 16 bits
-    sum += (sum >> 16)  # Add carry from above (if any)
-    answer = ~sum & 0xffff  # Invert and truncate to 16 bits
-    answer = socket.htons(answer)
-
-    return answer
-
-
-# =============================================================================#
-def do_one(myStats, destIP, hostname, timeout, mySeqNumber, packet_size, quiet=False):
-    """
-    Returns either the delay (in ms) or None on timeout.
-    """
-    delay = None
-
-    try:  # One could use UDP here, but it's obscure
-        mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-    except socket.error as e:
-        print("failed. (socket error: '%s')" % e.args[1])
-        raise  # raise the original error
-
-    my_ID = (get_ident() ^ os.getpid()) & 0xFFFF
-
-    sentTime = send_one_ping(mySocket, destIP, my_ID, mySeqNumber, packet_size)
-    if sentTime == None:
-        mySocket.close()
+            delay = None
+        print("IP: %s === ID: %s   ==  Delay:%s" % (self.destination_ip, str(self.my_id), str(delay)))
         return delay
 
-    myStats.pktsSent += 1
+    def send_one_ping(self):
+        # Header is type (8), code (8), checksum (16), id (16), sequence (16)
+        # (packet_size - 8) - Remove header size from packet size
+        myChecksum = 0
 
-    recvTime, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_one_ping(mySocket, my_ID, timeout)
-
-    mySocket.close()
-
-    if recvTime:
-        delay = (recvTime - sentTime) * 1000
-        if not quiet:
-            print("%d bytes from %s: icmp_seq=%d ttl=%d time=%d ms" % (
-                dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
-                  )
-        myStats.pktsRcvd += 1
-        myStats.totTime += delay
-        if myStats.minTime > delay:
-            myStats.minTime = delay
-        if myStats.maxTime < delay:
-            myStats.maxTime = delay
-    else:
-        delay = None
-        print("Request timed out.")
-
-    return delay
-
-
-# =============================================================================#
-def send_one_ping(mySocket, destIP, myID, mySeqNumber, packet_size):
-    """
-    Send one ping to the given >destIP<.
-    """
-    # destIP  =  socket.gethostbyname(destIP)
-
-    # Header is type (8), code (8), checksum (16), id (16), sequence (16)
-    # (packet_size - 8) - Remove header size from packet size
-    myChecksum = 0
-
-    # Make a dummy heder with a 0 checksum.
-    header = struct.pack(
-        "!BBHHH", ICMP_ECHO, 0, myChecksum, myID, mySeqNumber
-    )
-
-    padBytes = []
-    startVal = 0x42
-    # 'cose of the string/byte changes in python 2/3 we have
-    # to build the data differnely for different version
-    # or it will make packets with unexpected size.
-    if sys.version[:1] == '2':
-        bytes = struct.calcsize("d")
-        data = ((packet_size - 8) - bytes) * "Q"
-        data = struct.pack("d", default_timer()) + data
-    else:
-        for i in range(startVal, startVal + (packet_size - 8)):
-            padBytes += [(i & 0xff)]  # Keep chars in the 0-255 range
-        # data = bytes(padBytes)
-        data = bytearray(padBytes)
-
-    # Calculate the checksum on the data and the dummy header.
-    myChecksum = checksum(header + data)  # Checksum is in network order
-
-    # Now that we have the right checksum, we put that in. It's just easier
-    # to make up a new header than to stuff it into the dummy.
-    header = struct.pack(
-        "!BBHHH", ICMP_ECHO, 0, myChecksum, myID, mySeqNumber
-    )
-
-    packet = header + data
-
-    sendTime = default_timer()
-
-    try:
-        mySocket.sendto(packet, (destIP, 1))  # Port number is irrelevant for ICMP
-    except socket.error as e:
-        print("General failure (%s)" % (e.args[1]))
-        return
-
-    return sendTime
-
-
-# =============================================================================#
-def receive_one_ping(mySocket, myID, timeout):
-    """
-    Receive the ping from the socket. Timeout = in ms
-    """
-    timeLeft = timeout / 1000
-
-    while True:  # Loop while waiting for packet or timeout
-        startedSelect = default_timer()
-        whatReady = select.select([mySocket], [], [], timeLeft)
-        howLongInSelect = (default_timer() - startedSelect)
-        if whatReady[0] == []:  # Timeout
-            return None, 0, 0, 0, 0
-
-        timeReceived = default_timer()
-
-        recPacket, addr = mySocket.recvfrom(ICMP_MAX_RECV)
-
-        ipHeader = recPacket[:20]
-        iphVersion, iphTypeOfSvc, iphLength, \
-        iphID, iphFlags, iphTTL, iphProtocol, \
-        iphChecksum, iphSrcIP, iphDestIP = struct.unpack(
-            "!BBHHHBBHII", ipHeader
+        # Make a dummy heder with a 0 checksum.
+        header = struct.pack(
+            "!BBHHH", ICMP_ECHO, 0, myChecksum, self.my_id, self.my_sequence_number
         )
 
-        icmpHeader = recPacket[20:28]
-        icmpType, icmpCode, icmpChecksum, \
-        icmpPacketID, icmpSeqNumber = struct.unpack(
-            "!BBHHH", icmpHeader
+        padBytes = []
+        startVal = 0x42
+        # 'cose of the string/byte changes in python 2/3 we have
+        # to build the data differnely for different version
+        # or it will make packets with unexpected size.
+        if sys.version[:1] == '2':
+            bytes = struct.calcsize("d")
+            data = ((self.packet_size - 8) - bytes) * "Q"
+            data = struct.pack("d", default_timer()) + data
+        else:
+            for i in range(startVal, startVal + (self.packet_size - 8)):
+                padBytes += [(i & 0xff)]  # Keep chars in the 0-255 range
+            # data = bytes(padBytes)
+            data = bytearray(padBytes)
+
+        # Calculate the checksum on the data and the dummy header.
+        myChecksum = self.checksum(header + data)  # Checksum is in network order
+
+        # Now that we have the right checksum, we put that in. It's just easier
+        # to make up a new header than to stuff it into the dummy.
+        header = struct.pack(
+            "!BBHHH", ICMP_ECHO, 0, myChecksum, self.my_id, self.my_sequence_number
         )
 
-        if icmpPacketID == myID:  # Our packet
-            dataSize = len(recPacket) - 28
-            # print (len(recPacket.encode()))
-            return timeReceived, (dataSize + 8), iphSrcIP, icmpSeqNumber, iphTTL
+        packet = header + data
 
-        timeLeft = timeLeft - howLongInSelect
-        if timeLeft <= 0:
-            return None, 0, 0, 0, 0
+        sendTime = default_timer()
 
+        try:
+            self.my_socket.sendto(packet, (self.destination_ip, 1))  # Port number is irrelevant for ICMP
+        except socket.error as e:
+            print("General failure (%s)" % (e.args[1]))
+            return
+        return sendTime
 
-# =============================================================================#
-def dump_stats(myStats):
-    """
-    Show stats when pings are done
-    """
-    print("\n----%s PYTHON PING Statistics----" % (myStats.thisIP))
+    def receive_one_ping(self):
+        """
+        Receive the ping from the socket. Timeout = in ms
+        """
+        timeLeft = self.timeout / 1000
 
-    if myStats.pktsSent > 0:
-        myStats.fracLoss = (myStats.pktsSent - myStats.pktsRcvd) / myStats.pktsSent
+        while True:  # Loop while waiting for packet or timeout
+            startedSelect = default_timer()
+            whatReady = select.select([self.my_socket], [], [], timeLeft)
+            howLongInSelect = (default_timer() - startedSelect)
+            if whatReady[0] == []:  # Timeout
+                return None, 0, 0, 0, 0
 
-    print("%d packets transmitted, %d packets received, %0.1f%% packet loss" % (
-        myStats.pktsSent, myStats.pktsRcvd, 100.0 * myStats.fracLoss
-    ))
+            timeReceived = default_timer()
 
-    if myStats.pktsRcvd > 0:
-        print("round-trip (ms)  min/avg/max = %d/%0.1f/%d" % (
-            myStats.minTime, myStats.totTime / myStats.pktsRcvd, myStats.maxTime
-        ))
+            recPacket, addr = self.my_socket.recvfrom(ICMP_MAX_RECV)
 
-    print("")
-    return
+            ipHeader = recPacket[:20]
+            iphVersion, iphTypeOfSvc, iphLength, \
+            iphID, iphFlags, iphTTL, iphProtocol, \
+            iphChecksum, iphSrcIP, iphDestIP = struct.unpack(
+                "!BBHHHBBHII", ipHeader
+            )
 
+            icmpHeader = recPacket[20:28]
+            icmpType, icmpCode, icmpChecksum, \
+            icmpPacketID, icmpSeqNumber = struct.unpack(
+                "!BBHHH", icmpHeader
+            )
 
-# =============================================================================#
-def signal_handler(signum, frame):
-    """
-    Handle exit via signals
-    """
-    dump_stats()
-    print("\n(Terminated with signal %d)\n" % (signum))
-    sys.exit(0)
+            if icmpPacketID == self.my_id:  # Our packet
+                dataSize = len(recPacket) - 28
+                return timeReceived, (dataSize + 8), iphSrcIP, icmpSeqNumber, iphTTL
 
+            timeLeft = timeLeft - howLongInSelect
+            if timeLeft <= 0:
+                return None, 0, 0, 0, 0
 
-# =============================================================================#
+    @staticmethod
+    def checksum(source_string):
+        countTo = (int(len(source_string) / 2)) * 2
+        sum = 0
+        count = 0
+        loByte = 0
+        hiByte = 0
+        while count < countTo:
+            if (sys.byteorder == "little"):
+                loByte = source_string[count]
+                hiByte = source_string[count + 1]
+            else:
+                loByte = source_string[count + 1]
+                hiByte = source_string[count]
+            try:  # For Python3
+                sum = sum + (hiByte * 256 + loByte)
+            except:  # For Python2
+                sum = sum + (ord(hiByte) * 256 + ord(loByte))
+            count += 2
 
+        # Handle last byte if applicable (odd-number of bytes)
+        # Endianness should be irrelevant in this case
+        if countTo < len(source_string):  # Check for odd length
+            loByte = source_string[len(source_string) - 1]
+            try:  # For Python3
+                sum += loByte
+            except:  # For Python2
+                sum += ord(loByte)
 
-# =============================================================================#
-def quiet_ping(hostname, timeout=WAIT_TIMEOUT, count=NUM_PACKETS,
-               packet_size=PACKET_SIZE, path_finder=False):
-    """
-    Same as verbose_ping, but the results are returned as tuple
-    """
-    myStats = MyStats()  # Reset the stats
-    mySeqNumber = 0  # Starting value
+        sum &= 0xffffffff  # Truncate sum to 32 bits (a variance from ping.c, which
+        # uses signed ints, but overflow is unlikely in ping)
 
-    try:
-        destIP = socket.gethostbyname(hostname)
-    except socket.gaierror as e:
-        return False
+        sum = (sum >> 16) + (sum & 0xffff)  # Add high 16 bits to low 16 bits
+        sum += (sum >> 16)  # Add carry from above (if any)
+        answer = ~sum & 0xffff  # Invert and truncate to 16 bits
+        answer = socket.htons(answer)
 
-    myStats.thisIP = destIP
-
-    # This will send packet that we dont care about 0.5 seconds before it starts
-    # acrutally pinging. This is needed in big MAN/LAN networks where you sometimes
-    # loose the first packet. (while the switches find the way... :/ )
-    if path_finder:
-        fakeStats = MyStats()
-        do_one(fakeStats, destIP, hostname, timeout,
-               mySeqNumber, packet_size, quiet=True)
-        time.sleep(0.5)
-
-    for i in range(count):
-        delay = do_one(myStats, destIP, hostname, timeout,
-                       mySeqNumber, packet_size, quiet=True)
-
-        if delay == None:
-            delay = 0
-
-        mySeqNumber += 1
-
-        # Pause for the remainder of the MAX_SLEEP period (if applicable)
-        if (MAX_SLEEP > delay):
-            time.sleep((MAX_SLEEP - delay) / 1000)
-
-    if myStats.pktsSent > 0:
-        myStats.fracLoss = (myStats.pktsSent - myStats.pktsRcvd) / myStats.pktsSent
-    if myStats.pktsRcvd > 0:
-        myStats.avrgTime = myStats.totTime / myStats.pktsRcvd
-
-    # return tuple(max_rtt, min_rtt, avrg_rtt, percent_lost)
-    return myStats.maxTime, myStats.minTime, myStats.avrgTime, myStats.fracLoss
+        return answer
 
 
-# =============================================================================#
-def main():
-    parser = argparse.ArgumentParser(description=__description__)
-    parser.add_argument('-q', '--quiet', action='store_true',
-                        help='quiet output')
-    parser.add_argument('-c', '--count', type=int, default=NUM_PACKETS,
-                        help=('number of packets to be sent '
-                              '(default: %(default)s)'))
-    parser.add_argument('-W', '--timeout', type=float, default=WAIT_TIMEOUT,
-                        help=('time to wait for a response in seoncds '
-                              '(default: %(default)s)'))
-    parser.add_argument('-s', '--packet-size', type=int, default=PACKET_SIZE,
-                        help=('number of data bytes to be sent '
-                              '(default: %(default)s)'))
-    parser.add_argument('destination')
-    args = parser.parse_args()
+def ping_once(aa, destination_ip):
+    ping = Ping(my_socket=aa, destination_ip=destination_ip)
+    ping.ping_once()
 
 
-    ping = quiet_ping
+class SendPingThr(threading.Thread):
+    '''
+    发送ICMP请求报文的线程。
 
-    ping(args.destination, timeout=args.timeout * 1000, count=args.count,
-         packet_size=args.packet_size)
+    参数：
+        ipPool      -- 可迭代的IP地址池
+        icmpPacket  -- 构造的icmp报文
+        icmpSocket  -- icmp套字接
+        timeout     -- 设置发送超时
+    '''
+
+    def __init__(self, ipPool, Socket):
+        threading.Thread.__init__(self)
+        self.Socket = Socket
+        self.ipPool = ipPool
+
+    def run(self):
+        time.sleep(0.01)  # 等待接收线程启动
+        for ip in self.ipPool:
+            try:
+                ping = Ping(my_socket=self.Socket, destination_ip=ip)
+                ping.ping_once()
+            except socket.timeout:
+                break
 
 
 if __name__ == '__main__':
-    main()
+    my_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+    scaned_host_list = []
+    # sendThr = SendPingThr(ip_list, my_socket)
+    # sendThr.start()
+
+    # for ip in ip_list:
+    #     ping_once(my_socket, ip)
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+    # executor = concurrent.futures.ProcessPoolExecutor(max_workers=5)
+
+    futures = [executor.submit(ping_once, my_socket, ip) for ip in ip_list]
+    #
+    for future in concurrent.futures.as_completed(futures, timeout=120):
+        scaned_host_list.append(future.result())
+    executor.shutdown()
+    my_socket.close()

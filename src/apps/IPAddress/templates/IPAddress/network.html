@@ -41,10 +41,10 @@
 
 
 
-                        <td>{% if host.latest_scan_time_minute <= 60 %}
-                            {{ host.latest_scan_time_minute|floatformat:"0" }}分钟
-                        {% elif host.latest_scan_time_minute > 60 %}
-                            {{ host.latest_scan_time_hours|floatformat:"-1" }}小时
+                        <td>{% if host.ping_latest_minute <= 60 %}
+                            {{ host.ping_latest_minute|floatformat:"0" }}分钟
+                        {% elif host.ping_latest_minute > 60 %}
+                            {{ host.ping_latest_hours|floatformat:"-1" }}小时
                         {% endif %}
                         </td>
 
