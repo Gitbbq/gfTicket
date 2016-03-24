@@ -71,7 +71,8 @@ class Myself(BaseView):
             current_entry.last_time = timezone.now()
             current_entry.last_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
         else:
-            current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
+            if current_entry.first_time_ip is None:
+                current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
             attendance_system_user.on_duty = True
 
         current_entry.save()
