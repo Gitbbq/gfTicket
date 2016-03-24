@@ -33,6 +33,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Imports from your apps
 from apps.Core.models import CommonModel
+from apps.IPAddress.controller import ip_to_local, ip_to_department
 
 
 # Create your models here.
@@ -87,3 +88,27 @@ class Entry(CommonModel):
             6: _("星期日"),
         }
         return weekday_dict[self.date.weekday()]
+
+    def first_time_local(self):
+        return ip_to_local(self.first_time_ip)
+
+    def last_time_local(self):
+        return ip_to_local(self.last_time_ip)
+
+    def come_late(self):
+        # "迟到"
+        if self.first_time_ip is None or self.first_time is None:
+            return None
+        department = ip_to_department(self.first_time_ip)
+        if department is None:
+            return None
+        return self.first_time >= department.office_hours_start
+
+    def leave_early(self):
+        # "早退"
+        if self.last_time_ip is None or self.last_time is None:
+            return None
+        department = ip_to_department(self.last_time_ip)
+        if department is None:
+            return None
+        return self.last_time <= department.office_hours_stop
