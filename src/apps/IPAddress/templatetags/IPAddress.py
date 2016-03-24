@@ -30,6 +30,8 @@ register = template.Library()
 
 
 def ip_to_department(ip_address):
+    if ip_address is None:
+        return  _("无")
     try:
         host = Host.objects.get(ip_address=ip_address)
         return host.subnet.department.title
