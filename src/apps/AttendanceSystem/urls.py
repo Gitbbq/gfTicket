@@ -26,7 +26,7 @@ from django.conf.urls import url
 
 
 from .views import Error, Myself, AdminView, InitializeUser
-from .views import OnDuty
+from .views import OnDuty, AdminCover
 
 app_name = 'AttendanceSystem'
 urlpatterns = [
@@ -58,6 +58,16 @@ urlpatterns = [
         view=Myself.as_view(),
         name="check_out",
         kwargs={"check_out": True}
+        ),
+    url(regex=r'^admin_cover/(?P<worker_db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/in$',
+        view=AdminCover.as_view(),
+        name="admin_cover_in",
+        kwargs={"action": "in"}
+        ),
+    url(regex=r'^admin_cover/(?P<worker_db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/out$',
+        view=AdminCover.as_view(),
+        name="admin_cover_in",
+        kwargs={"action": "out"}
         ),
     # url(regex=r'^verified$',
     #     view=VerifiedPassword.as_view(),
