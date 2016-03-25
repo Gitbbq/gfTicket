@@ -119,10 +119,10 @@ class AdminCover(BaseView):
         current_entry, created = Entry.objects.get_or_create(user=worker,
                                                              date=timezone.now())
                                                              
-        if action=="check_out":
+        if action=="out":
             current_entry.last_time = timezone.datetime.strptime("18:00", "%H:%M").time()
             current_entry.last_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
-        elif action=="check_in":
+        elif action=="in":
             current_entry.first_time = timezone.datetime.strptime("8:00", "%H:%M").time()
             current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
         return self.go_back()
