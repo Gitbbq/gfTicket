@@ -66,7 +66,7 @@ urlpatterns = [
         ),
     url(regex=r'^admin_cover/(?P<worker_db_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/out$',
         view=AdminCover.as_view(),
-        name="admin_cover_in",
+        name="admin_cover_out",
         kwargs={"action": "out"}
         ),
     # url(regex=r'^verified$',
