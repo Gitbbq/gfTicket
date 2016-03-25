@@ -33,8 +33,16 @@
                     <tr>
                         <th>{{ worker.user|short_name }}</th>
                         <th>{% if worker.on_duty %}在岗{% else %}不在岗{% endif %}</th>
-                        <th>{{ worker.today_first_time }}</th>
-                        <th>{{ worker.today_last_time }}</th>
+                        <th>{% if worker.today_first_time %}
+                                {{ worker.today_first_time }}
+                            {% else %}
+                                <a href="{% url "AttendanceSystem:admin_cover_in" worker.db_uuid %}">授权</a>
+                            {% endif %}</th>
+                        <th>{% if worker.today_last_time %}
+                                {{ worker.today_last_time }}
+                            {% else %}
+                                <a href="{% url "AttendanceSystem:admin_cover_out" worker.db_uuid %}">授权</a>
+                            {% endif %}</th>
                     </tr>
                 {% endfor %}
 
