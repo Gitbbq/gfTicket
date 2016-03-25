@@ -125,5 +125,6 @@ class AdminCover(BaseView):
         elif action=="in":
             current_entry.first_time = timezone.datetime.strptime("8:00", "%H:%M").time()
             current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
+        current_entry.save()
         return self.go_back()
     
