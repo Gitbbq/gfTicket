@@ -71,7 +71,8 @@ class Myself(BaseView):
             current_entry.last_time = timezone.now()
             current_entry.last_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
         else:
-            current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
+            if current_entry.first_time_ip is None:  
+                current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")  
             attendance_system_user.on_duty = True
 
         current_entry.save()
@@ -106,3 +107,24 @@ class AdminView(BaseView):
         self.response_dict['entries'] = Entry.objects.filter(date__gte=timezone.datetime.today() - timezone.timedelta(days=62)).all()
         self.response_dict['workers'] = AttendanceSystemUser.objects.filter(is_worker=True).all()
         return self.response()
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(verified_required, name='dispatch')
+@method_decorator(has_attendance_system_user, name='dispatch')
+@method_decorator(verified_attendance_system_is_admin, name='dispatch')
+class AdminCover(BaseView):
+    def get(self, request, worker_db_uuid, action="check_out"):
+        self.response_dict["worker_db_uuid"] = worker_db_uuid
+        worker = AttendanceSystemUser.objects.get(db_uuid=self.response_dict["worker_db_uuid"])
+        current_entry, created = Entry.objects.get_or_create(user=worker,
+                                                             date=timezone.now())
+                                                             
+        if action=="out":
+            current_entry.last_time = timezone.datetime.strptime("18:00", "%H:%M").time()
+            current_entry.last_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
+        elif action=="in":
+            current_entry.first_time = timezone.datetime.strptime("8:00", "%H:%M").time()
+            current_entry.first_time_ip = request.META.get("REMOTE_ADDR", "192.168.1.1")
+        current_entry.save()
+        return self.go_back()
+    

@@ -4,6 +4,7 @@
 {% load local_time_format %}
 {% load SSO %}
 {% load IPAddress %}
+{% load time_range %}
 
 
 
@@ -32,8 +33,16 @@
                     <tr>
                         <th>{{ worker.user|short_name }}</th>
                         <th>{% if worker.on_duty %}在岗{% else %}不在岗{% endif %}</th>
-                        <th>{{ worker.today_first_time }}</th>
-                        <th>{{ worker.today_last_time }}</th>
+                        <th>{% if worker.today_first_time %}
+                                {{ worker.today_first_time }}
+                            {% else %}
+                                <a href="{% url "AttendanceSystem:admin_cover_in" worker.db_uuid %}">授权</a>
+                            {% endif %}</th>
+                        <th>{% if worker.today_last_time %}
+                                {{ worker.today_last_time }}
+                            {% else %}
+                                <a href="{% url "AttendanceSystem:admin_cover_out" worker.db_uuid %}">授权</a>
+                            {% endif %}</th>
                     </tr>
                 {% endfor %}
 
@@ -62,10 +71,10 @@
                         <th>{{ entry.date|format_date:"medium" }}</th>
                         <th>{{ entry.weekday }}</th>
                         <th>{{ entry.user.user|short_name }}</th>
-                        <th>{{ entry.first_time|format_time }}</th>
-                        <th><abbr title="{{ entry.first_time_ip }}">{{ entry.first_time_ip|ip_to_department }}</abbr></th>
-                        <th>{{ entry.last_time|format_time }}</th>
-                        <th><abbr title="{{ entry.last_time_ip }}">{{ entry.last_time_ip|ip_to_department }}</abbr></th>
+                        <th {% if entry.come_late == None %}class="warning"{% elif entry.come_late %}class="danger"{% endif %}>{{ entry.first_time|format_time }}</th>
+                        <th><abbr title="{{ entry.first_time_ip }}">{{ entry.first_time_local }}</abbr></th>
+                        <th {% if entry.leave_early == None %}class="warning"{% elif entry.leave_early %}class="danger"{% endif %}>{{ entry.last_time|format_time }}</th>
+                        <th><abbr title="{{ entry.last_time_ip }}">{{ entry.last_time_local }}</abbr></th>
                     </tr>
                 {% endfor %}
 

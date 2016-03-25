@@ -33,6 +33,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Imports from your apps
 from apps.Core.models import CommonModel
+from apps.IPAddress.controller import ip_to_local, ip_to_department
 
 
 # Create your models here.
@@ -64,8 +65,8 @@ class Entry(CommonModel):
     last_time = models.TimeField(verbose_name=_("最后一次的时间"), null=True)
     # first_time_local = models.CharField(verbose_name=_("签到地点"), default=" ", max_length=127)
     # last_time_local = models.CharField(verbose_name=_("签退地点"), default=" ", max_length=127)
-    first_time_ip = models.GenericIPAddressField(verbose_name=_("首次IP"), default="127.0.0.1")
-    last_time_ip = models.GenericIPAddressField(verbose_name=_("签退IP"), default="127.0.0.1")
+    first_time_ip = models.GenericIPAddressField(verbose_name=_("首次IP"), null=True, blank=True)
+    last_time_ip = models.GenericIPAddressField(verbose_name=_("签退IP"), null=True, blank=True)
 
     def __unicode__(self):
         return self.user.user.username
@@ -87,3 +88,27 @@ class Entry(CommonModel):
             6: _("星期日"),
         }
         return weekday_dict[self.date.weekday()]
+
+    def first_time_local(self):
+        return ip_to_local(self.first_time_ip)
+
+    def last_time_local(self):
+        return ip_to_local(self.last_time_ip)
+
+    def come_late(self):
+        # "迟到"
+        if self.first_time_ip is None or self.first_time is None:
+            return None
+        department = ip_to_department(self.first_time_ip)
+        if department is None:
+            return None
+        return self.first_time >= department.office_hours_start
+
+    def leave_early(self):
+        # "早退"
+        if self.last_time_ip is None or self.last_time is None:
+            return None
+        department = ip_to_department(self.last_time_ip)
+        if department is None:
+            return None
+        return self.last_time <= department.office_hours_stop

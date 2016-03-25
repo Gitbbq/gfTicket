@@ -15,6 +15,7 @@ from nmb.NetBIOS import NetBIOS
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.db import transaction
+from django.utils.translation import ugettext_lazy as _
 # Third-party app imports
 
 # Imports from your apps
@@ -129,3 +130,29 @@ def reverse_subnet(subnet):
         subnet.reverse_latest_time = timezone.datetime.now()
         subnet.save()
     return subnet
+
+
+def ip_to_local(ip_address):
+    if ip_address is None:
+        return _("无")
+    try:
+        host = Host.objects.get(ip_address=ip_address)
+    except Host.DoesNotExist:
+        return _("IP无归属子网")
+    if host.subnet.department is None:
+        return host.subnet.summary
+    else:
+        return host.subnet.department.title
+
+
+def ip_to_department(ip_address):
+    if ip_address is None:
+        return None
+    try:
+        host = Host.objects.get(ip_address=ip_address)
+    except Host.DoesNotExist:
+        return None
+    if host.subnet.department is None:
+        return None
+    else:
+        return host.subnet.department

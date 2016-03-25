@@ -17,37 +17,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 # Stdlib imports
-import ipaddress
+
 # Core Django imports
 from django import template
-from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
+
 # Third-party app imports
 
 # Imports from your apps
-from ..models import Host
 
 register = template.Library()
 
 
-def ip_to_department(ip_address):
-    if ip_address is None:
-        return  _("无")
-    try:
-        host = Host.objects.get(ip_address=ip_address)
-        return host.subnet.department.title
-    except:
-        return _("无法判断地址来源")
-
-
-def ip_sn(ip_address):
-    ip = ipaddress.ip_address(ip_address)
-    if ip.version == 4:
-        return ip.__str__().split(".")[-1]
-    elif ip.version == 6:
-        return ip.exploded.__str__().strip(":")[-1]
+def time_in_range(x, args="16:30,18:30"):
+    if x is None:
+        return False
+    q = args.split(',')
+    start = timezone.datetime.strptime(q[0], "%H:%M").time()
+    end = timezone.datetime.strptime(q[1], "%H:%M").time()
+    """Return true if x is in the range [start, end]"""
+    if start <= end:
+        return start <= x <= end
     else:
-        return "0"
+        return start <= x or x <= end
 
 
-register.filter('ip_to_department', ip_to_department)
-register.filter('ip_sn', ip_sn)
+register.filter('time_in_range', time_in_range)
