@@ -55,6 +55,7 @@ USER_APPS = [
     'apps.BusinessSystem',
     'apps.Document',
     'apps.SupportTicketSystem',
+    'apps.DayBook',
 
 ]
 

@@ -33,9 +33,15 @@ from django.contrib.auth.models import User
 from apps.AttendanceSystem.models import AttendanceSystemUser
 from apps.Document.models import DocumentUser
 from apps.SupportTicketSystem.models import SupportTicketSystemUser
+from apps.DayBook.models import DayBookUser
 
 
 # Register your models here.
+
+class DayBookUserInline(admin.StackedInline):
+    model = DayBookUser
+    max_num = 1
+    can_delete = False
 
 
 class AttendanceSystemUserInline(admin.StackedInline):
@@ -57,7 +63,7 @@ class SupportTicketSystemUserInline(admin.StackedInline):
 
 
 class UserAdmin(AuthUserAdmin):
-    inlines = [AttendanceSystemUserInline, DocumentUserInline, SupportTicketSystemUserInline]
+    inlines = [AttendanceSystemUserInline, DocumentUserInline, SupportTicketSystemUserInline, DayBookUserInline]
 
 
 admin.site.unregister(User)

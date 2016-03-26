@@ -1,0 +1,42 @@
+{% extends 'DayBook/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+
+
+{% block page_content %}
+    <div class="row">
+        <h2>外网终端信息<small>请选择部门/网点</small></h2>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered" id="department_table">
+
+                <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>网点号</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for department in department_list %}
+                    <tr>
+                        <td><a href="{% url "DayBook:InternetPC_DepartmentView" department.db_uuid %}" target="_blank">{{ department.title }}</a></td>
+                        <td><a href="{% url "DayBook:InternetPC_DepartmentView" department.db_uuid %}" target="_blank">{{ department.dot_code }}</a></td>
+{#                        <td>{{ department.db_uuid }}</td>#}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+                $(document).ready(function () {
+                    $('#department_table').DataTable({
+                        "paging": false,
+                        "info": false,
+                        "order": [[1, "asc"]]
+                    });
+                });
+    </script>
+{% endblock %}

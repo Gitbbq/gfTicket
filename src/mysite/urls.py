@@ -32,6 +32,7 @@ urlpatterns = [
                   url(r'^BusinessSystem/', include('apps.BusinessSystem.urls')),
                   url(r'^Equipment/', include('apps.Equipment.urls')),
                   url(r'^IPAddress/', include('apps.IPAddress.urls')),
+                  url(r'^DayBook/', include('apps.DayBook.urls')),
                   url(r'^$', Index.as_view(), name="index"),
                   url(r'^django-rq/', include('django_rq.urls')),
               ] \
