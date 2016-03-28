@@ -46,6 +46,7 @@ class Attachment(DownloadModel):
     class Meta:
         verbose_name = _("附件")
         verbose_name_plural = verbose_name
+        ordering = ['-db_created']
 
 
 class Driver(DownloadModel):
@@ -66,6 +67,7 @@ class Driver(DownloadModel):
     class Meta:
         verbose_name = _("驱动程序")
         verbose_name_plural = verbose_name
+        ordering = ['-db_created']
 
 
 class BusinessSoftware(DownloadModel):
@@ -75,3 +77,4 @@ class BusinessSoftware(DownloadModel):
     class Meta:
         verbose_name = _("业务软件")
         verbose_name_plural = verbose_name
+        ordering = ['-db_created']

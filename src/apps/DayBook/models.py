@@ -65,6 +65,8 @@ class InternetPC(CommonModel):
     hostname = models.CharField(max_length=128, verbose_name=_("主机名"), null=True, blank=True)
     department = models.ForeignKey(to=Department, limit_choices_to={"db_active": True}, verbose_name=_("网点"), related_name="internet_pc")
     description = models.TextField(verbose_name=_("详细描述"), null=True, blank=True)
+    manager = models.CharField(max_length=128, verbose_name=_("管理者"), null=True, blank=True)
+    way = models.CharField(max_length=128, verbose_name=_("上网方式"), default="eth", choices=(('adsl', _('ADSL')), ('eth', _('代理内网')),))
 
     class Meta:
         verbose_name = _(u"外网机")

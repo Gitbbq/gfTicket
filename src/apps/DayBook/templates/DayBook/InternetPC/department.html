@@ -17,6 +17,8 @@
                 <thead>
                 <tr>
                     <th>顺序号</th>
+                    <th>上网方式</th>
+                    <th>管理者</th>
                     <th>主机序列号</th>
                     <th>显示器序列号</th>
                     <th>IP地址</th>
@@ -29,6 +31,8 @@
                 {% for pc in pc_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
+                        <td>{{ pc.get_way_display }}</td>
+                        <td>{{ pc.manager }}</td>
                         <td>{{ pc.case_sn }}</td>
                         <td>{{ pc.screen_sn }}</td>
                         <td>{{ pc.ip_address }}</td>

@@ -20,16 +20,26 @@
 # Stdlib imports
 
 # Core Django imports
-from django import forms
-from django.forms import ModelForm
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
+from django.http import HttpResponse, HttpResponseBadRequest
+
 # Third-party app imports
+from apps.Core.views import BaseView
+from apps.Core.views import user2pass
 
 # Imports from your apps
-from ..models import InternetPC
+
+from ..models import DomainSetting
 
 
-class InternetPCForm(ModelForm):
-    class Meta:
-        model = InternetPC
-        fields = ['case_sn', 'screen_sn', 'ip_address', 'hostname', 'manager', 'description', 'way']
+class GetTadinPassword(BaseView):
+    def get(self, request, domain_fqdn):
+        ua = request.META.get("HTTP_USER_AGENT", "192.168.1.1")
+        if not ua == "gfTicket":
+            return HttpResponseBadRequest()
+        domain = DomainSetting.objects.get(fqdn__icontains=domain_fqdn)
+        return HttpResponse("%s\n%s" % (domain.connect_user, domain.connect_pass))

@@ -19,13 +19,14 @@
 # Stdlib imports
 
 # Core Django imports
-from django.conf.urls import url
+from django.conf.urls import include, url
 from django.contrib.auth.views import logout
 # Third-party app imports
 
 # Imports from your apps
 
 from .views import Login, VerifiedPassword, LocalLogin
+from .api.controller import GetTadinPassword
 
 app_name = 'SSO'
 urlpatterns = [
@@ -46,18 +47,9 @@ urlpatterns = [
         name="logout",
         kwargs={'next_page': '/'}
         ),
-    # url(regex=r'^add_region/$',
-    #     view=AddRegion.as_view(),
-    #     name="add_parent_region",
-    #     # kwargs={'parent_uuid': None}
-    #     ),
-    # url(regex=r'add_region/(?P<parent_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
-    #     view=AddRegion.as_view(),
-    #     name="add_child_region",
-    #     ),
-    # url(regex=r'add_network/(?P<region_uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
-    #     view=AddNetwork.as_view(),
-    #     name="add_network",
-    #     ),
-    # url(r'^api/', include('IPAM.api')),
+    url(regex=r'^api/getTadminPassword/(?P<domain_fqdn>.*)$',
+        view=GetTadinPassword.as_view(),
+        name="getTadminPassword",
+        ),
+
 ]

@@ -20,16 +20,7 @@
 # Stdlib imports
 
 # Core Django imports
-from django import forms
-from django.forms import ModelForm
-from django.utils.translation import ugettext_lazy as _
+
 # Third-party app imports
 
 # Imports from your apps
-from ..models import InternetPC
-
-
-class InternetPCForm(ModelForm):
-    class Meta:
-        model = InternetPC
-        fields = ['case_sn', 'screen_sn', 'ip_address', 'hostname', 'manager', 'description', 'way']

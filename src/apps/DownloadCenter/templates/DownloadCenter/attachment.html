@@ -41,6 +41,7 @@
                 <caption>附件列表</caption>
                 <thead>
                 <tr>
+                    <th>序号</th>
                     <th>创建日期</th>
                     <th>文件名</th>
                     {#                <th>Content Type</th>#}
@@ -56,6 +57,7 @@
                 <tbody>
                 {% for attachment in attachments %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ attachment.db_created|date:"Y/m/d" }}</td>
                         <td>{{ attachment.filename }}</td>
                         {#                    <th>{{ attachment.content_type }}</th>#}
