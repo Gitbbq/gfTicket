@@ -1,0 +1,37 @@
+{% extends 'DayBook/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            {% if password_list %}
+                <p class="lead">序列号：{{ clean_sn }}</p>
+                <p class="lead">密码可能是：{% for password in password_list %} <kbd>{{ password }}</kbd> 、{% endfor %}</p>
+                <p>多数情况使用第一个</p>
+            {% endif %}
+        </div>
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+                {% for hidden in form.hidden_fields %}
+                    {% bootstrap_field hidden %}
+                    {% if hidden.errors %}
+                        {% for error in hidden.errors %}
+                            {% bootstrap_alert error 'warning' %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {#             Include the visible fields#}
+                {% for field in form.visible_fields %}
+                    {% bootstrap_field field %}
+                {% endfor %}
+                {% bootstrap_form_errors form %}
+                {% buttons submit='查看密码' %}{% endbuttons %}
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

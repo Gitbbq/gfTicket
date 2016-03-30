@@ -1,0 +1,12 @@
+{% extends 'DayBook/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+
+
+
+{% block page_content %}
+    <h2>{{ request.GET.error }}</h2>
+
+    <p>错误不是因为浏览器的版本或设置错误。</p>
+{% endblock %}

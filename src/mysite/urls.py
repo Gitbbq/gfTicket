@@ -33,6 +33,7 @@ urlpatterns = [
                   url(r'^Equipment/', include('apps.Equipment.urls')),
                   url(r'^IPAddress/', include('apps.IPAddress.urls')),
                   url(r'^DayBook/', include('apps.DayBook.urls')),
+                  url(r'^NotebookPassword/', include('apps.NotebookPassword.urls')),
                   url(r'^django-rq/', include('django_rq.urls')),
                   url(r'^$', Index.as_view(), name="index"),
               ] \

@@ -56,7 +56,7 @@ USER_APPS = [
     'apps.Document',
     'apps.SupportTicketSystem',
     'apps.DayBook',
-
+    'apps.NotebookPassword',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + USER_APPS
