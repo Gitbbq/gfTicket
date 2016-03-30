@@ -1,0 +1,79 @@
+{% extends 'DayBook/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+
+
+{% block page_content %}
+    <div class="row">
+        <h2>{{ department.title }}
+            <small>外网信息</small>
+        </h2>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered" id="pc_table">
+
+                <thead>
+                <tr>
+                    <th>顺序号</th>
+                    <th>上网方式</th>
+                    <th>管理者</th>
+                    <th>主机序列号</th>
+                    <th>显示器序列号</th>
+                    <th>IP地址</th>
+                    <th>主机名</th>
+                    <th>详细描述</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for pc in pc_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ pc.get_way_display }}</td>
+                        <td>{{ pc.manager }}</td>
+                        <td>{{ pc.case_sn }}</td>
+                        <td>{{ pc.screen_sn }}</td>
+                        <td>{{ pc.ip_address }}</td>
+                        <td>{{ pc.hostname }}</td>
+                        <td>{{ pc.description }}</td>
+                        <td>{% if request.user.daybook_user.internet_pc_edit %}
+                            <a href="{% url "DayBook:InternetPC_PC_edit" pc.db_uuid %}" target="_blank">修改</a>
+                        {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if request.user.daybook_user.internet_pc_add %}
+                <a href="{% url "DayBook:InternetPC_Department_PC_add" department.db_uuid %}" class="btn btn-info">添加一台</a>
+            {% endif %}
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        $(document).ready(function () {
+            $('#pc_table').DataTable({
+                "paging": false,
+                "info": false,
+                "order": [[0, "asc"]]
+            });
+        });
+    </script>
+{% endblock %}

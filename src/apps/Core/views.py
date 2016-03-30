@@ -83,12 +83,7 @@ class BaseView(View):
         return HttpResponse(dumps(data), content_type="application/json")
 
 
-class Index(BaseView):
-    def dispatch(self, *args, **kwargs):
-        return super(Index, self).dispatch(*args, **kwargs)
 
-    def get(self, request):
-        return self.response(template_name="index.html")
 
 
 def user2pass(username):

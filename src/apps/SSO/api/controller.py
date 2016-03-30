@@ -16,40 +16,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 # Stdlib imports
 
 # Core Django imports
-from django.conf.urls import include, url
-from django.contrib.auth.views import logout
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
+from django.http import HttpResponse, HttpResponseBadRequest
+
 # Third-party app imports
+from apps.Core.views import BaseView
+from apps.Core.views import user2pass
 
 # Imports from your apps
 
-from .views import Login, VerifiedPassword, LocalLogin
-from .api.controller import GetTadinPassword
+from ..models import DomainSetting
 
-app_name = 'SSO'
-urlpatterns = [
-    url(regex=r'^login$',
-        view=Login.as_view(),
-        name="login",
-        ),
-    url(regex=r'^verified$',
-        view=VerifiedPassword.as_view(),
-        name="verified",
-        ),
-    url(regex=r'^locallogin$',
-        view=LocalLogin.as_view(),
-        name="locallogin",
-        ),
-    url(regex=r'^logout$',
-        view=logout,
-        name="logout",
-        kwargs={'next_page': '/'}
-        ),
-    url(regex=r'^api/getTadminPassword/(?P<domain_fqdn>.*)$',
-        view=GetTadinPassword.as_view(),
-        name="getTadminPassword",
-        ),
 
-]
+class GetTadinPassword(BaseView):
+    def get(self, request, domain_fqdn):
+        ua = request.META.get("HTTP_USER_AGENT", "192.168.1.1")
+        if not ua == "gfTicket":
+            return HttpResponseBadRequest()
+        domain = DomainSetting.objects.get(fqdn__icontains=domain_fqdn)
+        return HttpResponse("%s\n%s" % (domain.connect_user, domain.connect_pass))

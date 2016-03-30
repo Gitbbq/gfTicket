@@ -17,39 +17,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 # Stdlib imports
-
 # Core Django imports
-from django.conf.urls import include, url
-from django.contrib.auth.views import logout
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+
 # Third-party app imports
 
 # Imports from your apps
 
-from .views import Login, VerifiedPassword, LocalLogin
-from .api.controller import GetTadinPassword
 
-app_name = 'SSO'
-urlpatterns = [
-    url(regex=r'^login$',
-        view=Login.as_view(),
-        name="login",
-        ),
-    url(regex=r'^verified$',
-        view=VerifiedPassword.as_view(),
-        name="verified",
-        ),
-    url(regex=r'^locallogin$',
-        view=LocalLogin.as_view(),
-        name="locallogin",
-        ),
-    url(regex=r'^logout$',
-        view=logout,
-        name="logout",
-        kwargs={'next_page': '/'}
-        ),
-    url(regex=r'^api/getTadminPassword/(?P<domain_fqdn>.*)$',
-        view=GetTadinPassword.as_view(),
-        name="getTadminPassword",
-        ),
 
-]
+

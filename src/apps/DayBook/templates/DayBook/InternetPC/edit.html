@@ -1,0 +1,96 @@
+{% extends 'DayBook/layout.html' %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load SSO %}
+{% load pprint_json %}
+
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2>外网信息维护
+                <small>补充信息</small>
+            </h2>
+        </div>
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+
+                {% for hidden in form.hidden_fields %}
+                    {% bootstrap_field hidden %}
+                    {% if hidden.errors %}
+                        {% for error in hidden.errors %}
+                            {% bootstrap_alert error 'warning' %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                {% for field in form.visible_fields %}
+                    {% bootstrap_field field size="small" %}
+                {% endfor %}
+
+                {% bootstrap_form_errors form %}
+
+
+                {% buttons submit='提交' %}{% endbuttons %}
+
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if request.user.daybook_user.internet_pc_add %}
+                <a href="{% url "DayBook:InternetPC_PC_inactive" pc.db_uuid %}" class="btn btn-danger" onclick="return confirm('确定删除么？')">删除这台<small>禁用</small></a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <hr/>
+            <h3>日志</h3>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>用户</th>
+                    <th>内容</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for l in pc.log.all %}
+                    <tr>
+                        <td>{{ l.db_created }}</td>
+                        <td>{{ l.user|short_name }}</td>
+                        <td>
+                            <pre>{{ l.history|pprint_json }}</pre>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {#            $("#id_relevant_business").select2({language: "zh-CN"});#}
+            {#            $("#id_relevant_equipment").select2({language: "zh-CN"});#}
+            {#            $('#id_scheduled_time').datepicker({#}
+            {#                format: "yyyy-mm-dd",#}
+            {#                weekStart: 7,#}
+            {#                todayBtn: true,#}
+            {#                language: "zh-CN",#}
+            {#                daysOfWeekHighlighted: "1,2,3,4,5",#}
+            {#                todayHighlight: true#}
+            {#            });#}
+        });
+
+    </script>
+
+
+
+
+{% endblock %}
